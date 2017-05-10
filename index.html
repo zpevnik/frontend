@@ -3,7 +3,44 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Skautský zpěvník</title>
+
+		<link rel="stylesheet" href="bower_components/angular-material/angular-material.min.css">
+		<link rel="stylesheet" href="bower_components/angular-material-data-table/dist/md-data-table.min.css">
 	</head>
-	<body>
+	<body ng-app="scoutSongBook" layout="column">
+
+		<md-toolbar md-scroll-shrink="true">
+
+			<div class="md-toolbar-tools">
+				<h2 md-truncate flex>Skautský zpěvník</h2>
+			</div>
+
+		</md-toolbar>
+
+		<md-content flex>
+
+			<ng-view></ng-view>
+
+		</md-content>
+
+
+		<script src="bower_components/angular/angular.min.js"></script>
+		<script src="bower_components/angular-route/angular-route.min.js"></script>
+		<script src="bower_components/angular-aria/angular-aria.min.js"></script>
+		<script src="bower_components/angular-animate/angular-animate.min.js"></script>
+		<script src="bower_components/angular-messages/angular-messages.min.js"></script>
+		<script src="bower_components/angular-material/angular-material.min.js"></script>
+		<script src="bower_components/angular-material-data-table/dist/md-data-table.min.js"></script>
+
+		<script src="app.js"></script>
+		<script src="router.js"></script>
+
+		<!-- Services -->
+		<script src="services/AuthorsService.js"></script>
+		<script src="services/SongsService.js"></script>
+
+		<!-- Controllers -->
+		<script src="controllers/SongAddController.js"></script>
+		<script src="controllers/SongsOverviewController.js"></script>
 	</body>
 </html>

@@ -1,0 +1,85 @@
+<div layout="row" ng-controller="SongAddController as ctrl">
+
+	<div flex="66">
+
+		<md-card>
+
+			<md-card-content>
+
+				<md-input-container layout="row">
+					<div flex>
+
+						<label>Název písně</label>
+
+						<input type="text" ng-model="ctrl.song.name" required>
+
+						<div ng-messages="ctrl.errors.song.name">
+							<div ng-message="required">Název písně musí být vyplněn.</div>
+						</div>
+
+					</div>
+				</md-input-container>
+
+				<md-input-container layout="row">
+					<div flex>
+
+						<label>Text písně</label>
+
+						<div>
+							<textarea ng-model="ctrl.song.text" rows="5" width="100%" required></textarea>
+						</div>
+
+						<div ng-messages="ctrl.errors.song.text">
+							<div ng-message="required">Text písně musí být vyplněn.</div>
+						</div>
+
+					</div>
+				</md-input-container>
+
+			</md-card-content>
+
+		</md-card>
+
+	</div>
+
+	<div flex="33">
+
+		<md-card>
+			<md-card-title flex>
+
+				<md-card-title-text>
+					<span>Autor písně</span>
+				</md-card-title-text>
+
+			</md-card-title>
+
+			<md-card-content flex>
+
+				<md-autocomplete
+					md-selected-item="ctrl.song.author"
+					md-search-text="ctrl.searchAuthorName"
+					md-items="author in ctrl.searchAuthor( ctrl.searchAuthorName )"
+					md-item-text="author.fullName">
+					<md-item-template>
+						<span md-highlight-text="ctrl.searchAuthorName" md-highlight-flags="^i">{{author.fullName}}</span>
+					</md-item-template>
+
+					<md-not-found>
+						<a ng-click="ctrl.addAuthor( ctrl.searchAuthorName )">Žádný autor se jménem "{{ctrl.searchAuthorName}}" nebyl nalezen.
+						Vytvořte nového!</a>
+					</md-not-found>
+
+				</md-autocomplete>
+
+			</md-card-content>
+
+			<md-card-actions layout="row" layout-align="end center">
+				<md-button ng-click="ctrl.addSong( ctrl.song )">Přidat píseň</md-button>
+				<md-button ng-href="">Zrušit</md-button>
+			</md-card-actions>
+
+		</md-card>
+
+	</div>
+
+</div>
