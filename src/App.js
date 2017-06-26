@@ -17,9 +17,6 @@ class App extends Component {
     addAuthorSurname: '',
     allSongs: [],
     selectedSong: { authors: {} },
-    /*selectedSongVariant: {},
-    selectedSongVariants: [],
-    newSongVariantTitle: '',*/
     interpret: '',
     userInfo: {},
     disabled: false
@@ -55,14 +52,12 @@ class App extends Component {
   onSongTitleChange = e => {
     this.setState({
       selectedSong: {...this.state.selectedSong, title: e.target.value }
-      //selectedSongVariant: {...this.state.selectedSong, text: e.target.value}
     })
   }
 
   onSongChordsChange = e => {
     this.setState({
       selectedSong: {...this.state.selectedSong, text: e.target.value }
-      //selectedSongVariant: {...this.state.selectedSong, text: e.target.value}
     })
   }
 
@@ -150,21 +145,6 @@ class App extends Component {
       this.getSong(songId.value);
   }
 
-  /*onSelectedSongVariantChange = variantId => {
-    this.setState({ selectedSongVariant: this.state.selectedSongVariants.filter(variant => variant.id === variantId.value)[0] })
-  }
-
-  onNewSongVariantTitleChange = e => {
-    this.setState({ newSongVariantTitle: e.target.value })
-  }
-
-  createVariant = () => {
-    api.createVariant(this.state.newSongVariantTitle, this.state.selectedSong.id)
-      .then(data => {
-        this.getSong(this.state.selectedSong.id)
-      })
-  }*/
-
   saveSong = e => {
     e.preventDefault();
     api.updateSong(this.state.selectedSong.id, this.state.selectedSong.title, this.state.selectedSong.text,
@@ -180,12 +160,6 @@ class App extends Component {
     })
   }
 
-  /*updateSongAuthors = () => {
-    this.state.songAuthors.forEach(author => {
-      api.updateSongAuthor(this.state.selectedSong.id, author.value)
-    })
-  }*/
-
   render() {
     console.log(this.state)
     return (
@@ -200,11 +174,11 @@ class App extends Component {
               <h4>Vytvořit autora</h4>
               <form>
                 <div className="form-group">
-                  <label for="name">Jméno:</label>
+                  <label htmlFor="name">Jméno:</label>
                   <input type="text" className="form-control" id="name" value={this.state.addAuthorName} onChange={this.onAddAuthorNameChange} />
                 </div>
                 <div className="form-group">
-                  <label for="surname">Příjmení (optional):</label>
+                  <label htmlFor="surname">Příjmení (optional):</label>
                   <input type="text" className="form-control" id="surname" value={this.state.addAuthorSurname} onChange={this.onAddAuthorSurnameChange} />
                 </div>
                 <button type="submit" className="btn btn-default" onClick={this.createAuthor}>Vytvořit autora</button>
@@ -215,7 +189,7 @@ class App extends Component {
               <h4>Vytvořit píseň</h4>
               <form>
                 <div className="form-group">
-                  <label for="name">Jméno:</label>
+                  <label htmlFor="name">Jméno:</label>
                   <input type="text" className="form-control" id="name" value={this.state.addSongTitle} onChange={this.onAddSongTitleChange} />
                 </div>
                 <button className="btn btn-default" onClick={this.createSong}>Vytvořit píseň</button>
@@ -226,7 +200,7 @@ class App extends Component {
               <h4>Editace písně</h4>
               <form>
                 <div className="form-group">
-                  <label for="name">Vybrat píseň:</label>
+                  <label htmlFor="name">Vybrat píseň:</label>
                   <Select id="name" options={mapSongsToSelect(this.state.allSongs)} value={this.state.selectedSong.id} onChange={this.onSelectedSongChange} />
                 </div>
               </form>
@@ -235,17 +209,17 @@ class App extends Component {
 
               <form>
                 <div className="form-group">
-                  <label for="name">Jméno písně:</label>
+                  <label htmlFor="name">Jméno písně:</label>
                   <input type="text" className="form-control" id="name" onChange={this.onSongTitleChange} value={this.state.selectedSong.title} disabled={!this.state.selectedSong.id} />
                 </div>
 
                 <div className="form-group">
-                  <label for="interpreter">Interpret:</label>
+                  <label htmlFor="interpreter">Interpret:</label>
                   <Select id="interpreter" multi options={this.state.allAuthors} value={this.state.selectedSong.interpreters} onChange={this.onInterpreterChange} disabled={!this.state.selectedSong.id} />
                 </div>
 
                 <div className="form-group">
-                  <label for="text">Píseň:</label>
+                  <label htmlFor="text">Píseň:</label>
                   <textarea
                     disabled={!this.state.selectedSong.id}
                     value={this.state.selectedSong.text}
@@ -256,12 +230,12 @@ class App extends Component {
                 </div>
                 
                 <div className="form-group">
-                  <label for="music">Autor hudby:</label>
+                  <label htmlFor="music">Autor hudby:</label>
                   <Select id="music" multi options={this.state.allAuthors} value={this.state.selectedSong.authors.music} onChange={this.onMusicAuthorChange} disabled={!this.state.selectedSong.id} />
                 </div>
 
                 <div className="form-group">
-                  <label for="lyrics">Autor textu:</label>
+                  <label htmlFor="lyrics">Autor textu:</label>
                   <Select id="lyrics" multi options={this.state.allAuthors} value={this.state.selectedSong.authors.lyrics} onChange={this.onLyricsAuthorChange} disabled={!this.state.selectedSong.id} />
                 </div>
 
@@ -277,6 +251,7 @@ class App extends Component {
               <hr />
               <p>
                 Editor využívá značky pro tvorbu písniček. 
+              </p>
                 <ul>
                   <li>[C] - akord</li>
                   <li>## - začátek sloky</li>
@@ -288,7 +263,6 @@ class App extends Component {
                   <li>&gt; - začátek mluveného slova</li>
                   <li>&lt; - konec mluveného slova</li>
                 </ul>
-              </p>
               <hr />
               <h4>Příklad písně</h4>
               <p>

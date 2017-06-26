@@ -67,20 +67,6 @@ export default class Api {
       })
   }
 
-  /*getSongVariants = songId => {
-    return this.fetch(`songs/${songId}/variants`)
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
-  }
-
-  getSongAuthors = songId => {
-    return this.fetch(`songs/${songId}/authors`)
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
-  }*/
-
   createAuthor = (firstname, surname) => {
     return this.fetch('authors', { method: 'POST', body: JSON.stringify({ firstname, surname }) })
       .catch(error => {
@@ -94,22 +80,6 @@ export default class Api {
         console.log('There has been a problem with your fetch operation: ' + error.message)
       })
   }
-
-  /*createVariant = (title, songId) => {
-    return this.fetch(`songs/${songId}/variants`, { method: 'POST', body: JSON.stringify({ title, text: 'Sem přidej píseň v ChordPro formátu...' }) })
-      .then(data => console.log(data))
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
-  }
-
-  updateSongAuthor = (songId, authorId) => {
-    return this.fetch(`songs/${songId}/authors/${authorId}`, { method: 'POST' })
-      .then(data => console.log(data))
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
-  }*/
 
   updateSong = (songId, songTitle, text, musicAuthors, lyricsAuthors, interpreters) => {
     console.log(musicAuthors);
