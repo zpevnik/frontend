@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import Select from 'react-select';
 import Api from './api'
-import { mapAuthorsToSelect, mapSongsToSelect } from './lib'
+import * as lib from './lib'
 import { observer, inject } from 'mobx-react'
 import './App.css'
 
@@ -9,166 +9,22 @@ const api = new Api()
 
 const App = inject('store')(observer(class extends Component {
 
-  state = {
-    songChords: '',
-    addSongTitle: '',
-    allAuthors: [],
-    songAuthors: [],
-    addAuthorName: '',
-    addAuthorSurname: '',
-    allSongs: [],
-    selectedSong: { authors: {} },
-    interpret: '',
-    userInfo: {},
-    disabled: false
-  }
-
   componentDidMount = () => {
-    this.getAllAuthors()
-    this.getAllSongs()
-    this.getUser()
-  }
-
-  /* add song functions */
-  onAddSongTitleChange = e => {
-    this.setState({
-      addSongTitle: e.target.value
-    })
-  }
-
-  /* add author functions */
-  onAddAuthorNameChange = e => {
-    this.setState({
-      addAuthorName: e.target.value
-    })
-  }
-
-  onAddAuthorSurnameChange = e => {
-    this.setState({
-      addAuthorSurname: e.target.value
-    })
-  }
-
-  /* edit song functions */
-  onSongTitleChange = e => {
-    this.setState({
-      selectedSong: {...this.state.selectedSong, title: e.target.value }
-    })
-  }
-
-  onSongChordsChange = e => {
-    this.setState({
-      selectedSong: {...this.state.selectedSong, text: e.target.value }
-    })
-  }
-
-  onInterpreterChange = value => {
-    this.setState({
-      selectedSong: {...this.state.selectedSong, interpreters: value.map(it => it.value) }
-    })
-  }
-
-  onMusicAuthorChange = value => {
-    this.setState({
-      selectedSong: {...this.state.selectedSong, authors: { ...this.state.selectedSong.authors, music: value.map(it => it.value) } }
-    })
-  }
-
-  onLyricsAuthorChange = value => {
-    this.setState({
-      selectedSong: {...this.state.selectedSong, authors: { ...this.state.selectedSong.authors, lyrics: value.map(it => it.value) } }
-    })
-  }
-
-
-  createAuthor = e => {
-    e.preventDefault();
-    api.createAuthor(this.state.addAuthorName, this.state.addAuthorSurname)
-      .then(data => {
-        this.getAllAuthors()
-        this.setState({
-          addAuthorSurname: '',
-          addAuthorName: ''
-        })
-      })
-  }
-
-  createSong = e => {
-    e.preventDefault();
-    api.createSong(this.state.addSongTitle)
-      .then(data => {
-        this.getAllSongs()
-        this.setState({ addSongTitle: ''})
-      })
-  }
-
-  getAllAuthors = () => {
-    api.getAuthors().then(authors => {
-      this.setState({
-        allAuthors: mapAuthorsToSelect(authors)
-      })
-    })
-  }
-
-  getAllSongs = () => {
-    api.getSongs().then(songs => {
-      this.setState({
-        allSongs: songs
-      })
-    })
-  }
-
-  getUser = () => {
-    api.getUser().then(user => {
-      this.setState({
-        userInfo: user
-      })
-    })
-  }
-
-  getSong = songId => {
-    api.getSong(songId).then(song => {
-      this.setState({
-        selectedSong: song
-      })
-    })
-  }
-
-  clearSong = () => {
-    this.setState({
-      selectedSong: {title: '', text: '', authors: {}}
-    })
-  }
-
-  onSelectedSongChange = songId => {
-    this.clearSong();
-    if (songId != null)
-      this.getSong(songId.value);
-  }
-
-  saveSong = e => {
-    e.preventDefault();
-    api.updateSong(this.state.selectedSong.id, this.state.selectedSong.title, this.state.selectedSong.text,
-      this.state.selectedSong.authors.music, this.state.selectedSong.authors.lyrics, this.state.selectedSong.interpreters);
-    this.clearSong();
-  }
-
-  exportSong = e => {
-    e.preventDefault();
-    api.exportSong(this.state.selectedSong.id).then(file => {
-      console.log(file);
-      window.open(file);
-    })
+    const { store } = this.props
+    store.getAuthors()
+    store.getSongs()
+    store.getUser()
   }
 
   render() {
-    console.log(this.state)
+    const { store } = this.props
+    
     return (
       <div className="container">
         <div id="content">
           <div className="row-fluid" style={{ marginTop: '10px' }}>
-            <span>{this.state.userInfo.name} </span>
-            <a href={ this.state.userInfo.logout_link }>Logout</a>
+            <span>{store.user.name} </span>
+            <a href={ store.user.logout_link }>Logout</a>
           </div>
           <div className="row">
             <div className="col-md-4 col-sm-12">
@@ -176,13 +32,25 @@ const App = inject('store')(observer(class extends Component {
               <form>
                 <div className="form-group">
                   <label htmlFor="name">Jméno:</label>
-                  <input type="text" className="form-control" id="name" value={this.state.addAuthorName} onChange={this.onAddAuthorNameChange} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="name"
+                    value={store.inputs.addAuthorName}
+                    onChange={e => store.onAddInputChange('addAuthorName', e)} />
                 </div>
                 <div className="form-group">
                   <label htmlFor="surname">Příjmení (optional):</label>
-                  <input type="text" className="form-control" id="surname" value={this.state.addAuthorSurname} onChange={this.onAddAuthorSurnameChange} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="surname"
+                    value={store.inputs.addAuthorSurname}
+                    onChange={e => store.onAddInputChange('addAuthorSurname', e)} />
                 </div>
-                <button type="submit" className="btn btn-default" onClick={this.createAuthor}>Vytvořit autora</button>
+                <button className="btn btn-default" onClick={store.createAuthor}>
+                    Vytvořit autora
+                </button>
               </form>
 
               <hr />
@@ -191,9 +59,16 @@ const App = inject('store')(observer(class extends Component {
               <form>
                 <div className="form-group">
                   <label htmlFor="name">Jméno:</label>
-                  <input type="text" className="form-control" id="name" value={this.state.addSongTitle} onChange={this.onAddSongTitleChange} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="name"
+                    value={store.inputs.addSongTitle}
+                    onChange={e => store.onAddInputChange('addSongTitle', e)} />
                 </div>
-                <button className="btn btn-default" onClick={this.createSong}>Vytvořit píseň</button>
+                <button className="btn btn-default" onClick={store.createSong}>
+                  Vytvořit píseň
+                </button>
               </form>
             </div>
 
@@ -202,7 +77,11 @@ const App = inject('store')(observer(class extends Component {
               <form>
                 <div className="form-group">
                   <label htmlFor="name">Vybrat píseň:</label>
-                  <Select id="name" options={mapSongsToSelect(this.state.allSongs)} value={this.state.selectedSong.id} onChange={this.onSelectedSongChange} />
+                  <Select
+                    id="name"
+                    options={lib.mapSongsToSelect(store.songs)}
+                    value={store.selectedSong.id}
+                    onChange={store.onSongSelect} />
                 </div>
               </form>
 
@@ -211,37 +90,65 @@ const App = inject('store')(observer(class extends Component {
               <form>
                 <div className="form-group">
                   <label htmlFor="name">Jméno písně:</label>
-                  <input type="text" className="form-control" id="name" onChange={this.onSongTitleChange} value={this.state.selectedSong.title} disabled={!this.state.selectedSong.id} />
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="name"
+                    onChange={e => store.onSongChange('title', e)}
+                    value={store.selectedSong.title}
+                    disabled={!store.isSongSelected} />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="interpreter">Interpret:</label>
-                  <Select id="interpreter" multi options={this.state.allAuthors} value={this.state.selectedSong.interpreters} onChange={this.onInterpreterChange} disabled={!this.state.selectedSong.id} />
+                  <Select
+                    id="interpreter"
+                    multi
+                    options={lib.mapAuthorsToSelect(store.authors)}
+                    value={store.selectedSong.interpreters.slice()}
+                    onChange={payload => store.onSongChange('interpreters', payload)}
+                    disabled={!store.isSongSelected} />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="text">Píseň:</label>
                   <textarea
-                    disabled={!this.state.selectedSong.id}
-                    value={this.state.selectedSong.text}
-                    onChange={this.onSongChordsChange}
+                    id="text"
                     className="form-control"
                     rows={10}
-                    id="text" />
+                    value={store.selectedSong.text}
+                    onChange={e => store.onSongChange('text', e)}
+                    disabled={!store.isSongSelected} />
                 </div>
                 
                 <div className="form-group">
                   <label htmlFor="music">Autor hudby:</label>
-                  <Select id="music" multi options={this.state.allAuthors} value={this.state.selectedSong.authors.music} onChange={this.onMusicAuthorChange} disabled={!this.state.selectedSong.id} />
+                  <Select
+                    id="music"
+                    multi
+                    options={lib.mapAuthorsToSelect(store.authors)}
+                    value={store.selectedSong.authors.music.slice()}
+                    onChange={payload => store.onSongChange('musicAuthors', payload)}
+                    disabled={!store.isSongSelected} />
                 </div>
 
                 <div className="form-group">
                   <label htmlFor="lyrics">Autor textu:</label>
-                  <Select id="lyrics" multi options={this.state.allAuthors} value={this.state.selectedSong.authors.lyrics} onChange={this.onLyricsAuthorChange} disabled={!this.state.selectedSong.id} />
+                  <Select
+                    id="lyrics"
+                    multi
+                    options={lib.mapAuthorsToSelect(store.authors)}
+                    value={store.selectedSong.authors.lyrics.slice()}
+                    onChange={payload => store.onSongChange('lyricsAuthors', payload)}
+                    disabled={!store.isSongSelected} />
                 </div>
 
-                <button onClick={this.saveSong} className="btn btn-default" disabled={!this.state.selectedSong.id}>Uložit píseň</button>
-                <button onClick={this.exportSong} className="btn btn-default" disabled={!this.state.selectedSong.id}>Exportovat píseň</button>
+                <button onClick={store.onSongSave} className="btn btn-default" disabled={!store.isSongSelected}>
+                  Uložit píseň
+                </button>
+                <button onClick={store.onSongExport} className="btn btn-default" disabled={!store.isSongSelected}>
+                  Exportovat píseň
+                </button>
               </form>
             </div>
             <div className="col-md-4 col-sm-12">

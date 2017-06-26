@@ -1,5 +1,4 @@
 export const mapAuthorsToSelect = authors => {
-  if (!authors) return []
   return authors.map(author => (
     {
       value: author.id,
@@ -18,12 +17,11 @@ export const mapSongsToSelect = songs => {
   ))
 }
 
-export const mapVariantsToSelect = variants => {
-  if (!variants) return []
-  return variants.map(variant => (
-    {
-      value: variant.id,
-      label: variant.title
-    }
-  ))
-}
+export const convertSongToJson = song => (
+  {
+    'title': song.title,
+    'text': song.text,
+    'authors': song.authors,
+    'interpreters': song.interpreters
+  }
+)
