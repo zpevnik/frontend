@@ -32,8 +32,6 @@ export class Store {
     })
   }
 
-
-
   onAddInputChange = (name, event) => {
     this.inputs[name] = event.target.value
   }
@@ -43,8 +41,6 @@ export class Store {
       this.selectedSong[name] = payload.target.value
     } else if (name === 'interpreters') {
       this.selectedSong[name] = payload.map(person => person.value)
-      console.log('payload: ', payload)
-      console.log('changed interpreters to ', payload.map(person => person.value))
     } else if (name === 'musicAuthors') {
       this.selectedSong.authors.music = payload.map(person => person.value)
     } else if (name === 'lyricsAuthors') {
