@@ -1,5 +1,5 @@
 ## Setup
 Required: git, node.
-### `git clone https://github.com/redwarff/zpevnik.git`
+### `git clone https://github.com/zpevnik/frontend.git`
 ### `npm install`
 ### `npm start`
