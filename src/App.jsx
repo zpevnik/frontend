@@ -2,11 +2,12 @@ import React, { Component } from 'react'
 import Select from 'react-select';
 import Api from './api'
 import { mapAuthorsToSelect, mapSongsToSelect } from './lib'
+import { observer, inject } from 'mobx-react'
 import './App.css'
 
 const api = new Api()
 
-class App extends Component {
+const App = inject('store')(observer(class extends Component {
 
   state = {
     songChords: '',
@@ -289,6 +290,6 @@ class App extends Component {
       </div>
     )
   }
-}
+}))
 
 export default App
