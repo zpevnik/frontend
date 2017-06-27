@@ -69,19 +69,19 @@ export class Store {
 
   getAuthors = () => {
     api.getAuthors().then(authors => {
-      this.authors = authors
+      this.authors = authors || []
       })
   }
 
   getSongs = () => {
     api.getSongs().then(songs => {
-      this.songs = songs
+      this.songs = songs || []
       })
   }
 
   getUser = () => {
     api.getUser().then(user => {
-      this.user = user
+      this.user = user || {}
       })
   }
 
