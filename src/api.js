@@ -8,10 +8,18 @@ exportHeaders.append('Accept', 'application/pdf')
 
 export default class Api {
 
-  apiUrl = 'https://zpevnik-test.herokuapp.com/api/v1'
+  apiUrl = process.env.API_URL || 'https://zpevnik-test.herokuapp.com/api/v1'
 
-  fetch = (endpoint, options) => (
-    fetch(`${this.apiUrl}/${endpoint}`, { headers: myHeaders, mode: 'cors', cache: 'default', credentials: 'include', ...options })
+  fetch = (endpoint, options, query) => {
+    let queryUrl
+    if (query) {
+      const esc = encodeURIComponent
+      queryUrl = Object.keys(query)
+      .filter(param => query[param])
+      .map(param => esc(param) + '=' + esc(query[param]))
+      .join('&');
+    }
+    return fetch(`${this.apiUrl}/${endpoint}${query && queryUrl ? '?' + queryUrl : ''}`, { headers: myHeaders, mode: 'cors', cache: 'default', credentials: 'include', ...options })
       .then(response => {
         if(response.ok) {
           return response.json()
@@ -19,7 +27,7 @@ export default class Api {
         // return response.json()
         throw new Error('Network response was not ok.')
       })
-  )
+  }
 
   // function for pdf export
   exportFetch = (endpoint, options) => (
@@ -39,6 +47,13 @@ export default class Api {
       })
   }
 
+  getInterpreters = () => {
+    return this.fetch('interpreters')
+      .catch(error => {
+        console.log('There has been a problem with your fetch operation: ' + error.message)
+      })
+  }
+
   getUser = () => {
     return this.fetch('user')
       .catch(error => {
@@ -46,8 +61,12 @@ export default class Api {
       })
   }
 
-  getSongs = () => {
-    return this.fetch('songs')
+  getSongs = (query, page, perPage) => {
+    return this.fetch(`songs`, null, {
+      query,
+      page,
+      'per_page': perPage
+    })
       .catch(error => {
         console.log('There has been a problem with your fetch operation: ' + error.message)
       })
@@ -67,24 +86,37 @@ export default class Api {
       })
   }
 
-  createAuthor = (firstname, surname) => {
-    return this.fetch('authors', { method: 'POST', body: JSON.stringify({ firstname, surname }) })
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
+  createAuthor = name => {
+    console.log('Sending ', name)
+    return this.fetch('authors', { method: 'POST', body: JSON.stringify({ name }) })
+      // .catch(error => {
+      //   console.log('There has been a problem with your fetch operation: ' + error.message)
+      // })
   }
 
-  createSong = title => {
-    return this.fetch('songs', { method: 'POST', body: JSON.stringify({ title }) })
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
+  createInterpreter = name => {
+    console.log('Sending ', name)
+    return this.fetch('interpreters', { method: 'POST', body: JSON.stringify({ name }) })
+      // .catch(error => {
+      //   console.log('There has been a problem with your fetch operation: ' + error.message)
+      // })
+  }
+
+  deleteAuthor = id => {
+    return this.fetch(`authors/${id}`, { method: 'DELETE' })
+  }
+
+  createSong = song => {
+    return this.fetch('songs', { method: 'POST', body: JSON.stringify(song) })
+      // .catch(error => {
+      //   console.log('There has been a problem with your fetch operation: ' + error.message)
+      // })
   }
 
   updateSong = (songId, song) => {
     return this.fetch(`songs/${songId}`, { method: 'PUT', body: JSON.stringify(song) })
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
+      // .catch(error => {
+      //   console.log('There has been a problem with your fetch operation: ' + error.message)
+      // })
   }
 }

@@ -1,12 +1,3 @@
-export const mapAuthorsToSelect = authors => {
-  return authors.map(author => (
-    {
-      value: author.id,
-      label: `${author.firstname} ${author.surname}`
-    }
-  ))
-}
-
 export const mapSongsToSelect = songs => {
   if (!songs) return []
   return songs.map(song => (

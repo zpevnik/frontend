@@ -1,4 +1,4 @@
-import { extendObservable } from 'mobx'
+import { extendObservable, toJS } from 'mobx'
 import Api from './api'
 import * as lib from './lib'
 
@@ -7,8 +7,9 @@ const api = new Api()
 const emptySong = { 
   title: '',
   text: '',
+  description: '',
   interpreters: [],
-  authors: { 
+  authors: {
     music: [],
     lyrics: []
   }
@@ -17,19 +18,55 @@ const emptySong = {
 export class Store {
   constructor (props) {
     extendObservable(this, {
-      inputs: {
-        addAuthorName: '',
-        addAuthorSurname: '',
-        addSongTitle: ''
-      },
+      newSongMode: false,
       selectedSong: emptySong,
       user: {},
       authors: [],
+      interpreters: [],
       songs: [],
+      searchQuery: '',
       get isSongSelected() {
         return Boolean(this.selectedSong.id)
+      },
+      get authorsToSelect() {
+        return this.authors.map(author => (
+          {
+            value: author.id,
+            label: author.name
+          }
+        ))
+      },
+      get interpretersToSelect() {
+        return this.interpreters.map(interpreter => (
+          {
+            value: interpreter.id,
+            label: interpreter.name
+          }
+        ))
+      },
+      get selectedSongInterpretersToSelect() {
+        return this.selectedSong.interpreters.map(interpreter => ({
+          value: interpreter.id,
+          label: interpreter.name
+        }))
+      },
+      get selectedSongMusicAuthorsToSelect() {
+        return this.selectedSong.authors.music.map(author => ({
+          value: author.id,
+          label: author.name
+        }))
+      },
+      get selectedSongLyricsAuthorsToSelect() {
+        return this.selectedSong.authors.lyrics.map(author => ({
+          value: author.id,
+          label: author.name
+        }))
       }
     })
+  }
+
+  onSearchQueryChange = e => {
+    this.searchQuery = e.target.value
   }
 
   onAddInputChange = (name, event) => {
@@ -37,51 +74,117 @@ export class Store {
   }
 
   onSongChange = (name, payload) => {
-    if (name === 'title' || name === 'text') {
+    if (name === 'title' || name === 'text' || name === 'description') {
       this.selectedSong[name] = payload.target.value
     } else if (name === 'interpreters') {
-      this.selectedSong[name] = payload.map(person => person.value)
+      this.selectedSong[name] = payload.map(item => ({
+        id: item.value,
+        name: item.label
+      }))
     } else if (name === 'musicAuthors') {
-      this.selectedSong.authors.music = payload.map(person => person.value)
+      this.selectedSong.authors.music = payload.map(item => ({
+        id: item.value,
+        name: item.label
+      }))
     } else if (name === 'lyricsAuthors') {
-      this.selectedSong.authors.lyrics = payload.map(person => person.value)
+      this.selectedSong.authors.lyrics = payload.map(item => ({
+        id: item.value,
+        name: item.label
+      }))
     }
   }
 
-  createAuthor = e => {
-    e.preventDefault()
-    api.createAuthor(this.inputs.addAuthorName, this.inputs.addAuthorSurname)
-      .then(data => {
-        this.getAuthors()
-        this.inputs.addAuthorName = ''
-        this.inputs.addAuthorSurname = ''
-      })
+  createAuthor = name => {
+    return api.createAuthor(name)
   }
 
-  createSong = e => {
-    e.preventDefault()
-    api.createSong(this.inputs.addSongTitle)
-      .then(data => {
-        this.getSongs()
-        this.inputs.addSongTitle = ''
-      })
+  createSong = isNew => {
+    const newAuthors = this.selectedSong.authors.music.filter(person => person.id === person.name)
+      .concat(this.selectedSong.authors.lyrics.filter(person => person.id === person.name))
+      .map(person => person.name )
+      .filter((person, i, arr) => arr.indexOf(person) === i)
+    
+    const newInterpreters = this.selectedSong.interpreters.filter(person => person.id === person.name)
+      .map(person => person.name )
+
+    const newAuthorsPromises = newAuthors.map(name => api.createAuthor(name))
+    const newInterpretersPromises = newInterpreters.map(name => api.createInterpreter(name))
+
+    return Promise.all(newAuthorsPromises.concat(newInterpretersPromises)).then(body => {
+      return Promise.all([this.getAuthors(), this.getInterpreters()])
+    }).then(() => {
+      const mapNewlyCreatedAuthors = author => {
+        if (newAuthors.includes(author.name)) {
+          return { name: author.name, id: this.authors.find(author2 => author2.name === author.name).id }
+        } else {
+          return author
+        }
+      }
+      const mapNewlyCreatedInterpreters = interpreter => {
+        if (newInterpreters.includes(interpreter.name)) {
+          return { name: interpreter.name, id: this.interpreters.find(interpreter2 => interpreter2.name === interpreter.name).id }
+        } else {
+          return interpreter
+        }
+      }
+      this.selectedSong.authors.music = this.selectedSong.authors.music.map(mapNewlyCreatedAuthors)
+      this.selectedSong.authors.lyrics = this.selectedSong.authors.lyrics.map(mapNewlyCreatedAuthors)
+      this.selectedSong.interpreters = this.selectedSong.interpreters.map(mapNewlyCreatedInterpreters)
+      
+      const newSong = toJS(this.selectedSong)
+      newSong.authors.music = newSong.authors.music.map(author => author.id)
+      newSong.authors.lyrics = newSong.authors.lyrics.map(author => author.id)
+      newSong.interpreters = newSong.interpreters.map(interpreter => interpreter.id)
+      if (isNew) {
+        return api.createSong(newSong)
+      } else {
+        return api.updateSong(newSong.id, newSong)
+      }
+    }).catch(error => {
+      console.log('Oh no, there was problem with your request: ', error)
+    })
   }
 
   getAuthors = () => {
-    api.getAuthors().then(authors => {
+    return api.getAuthors().then(authors => {
       this.authors = authors || []
+      return authors
       })
   }
 
-  getSongs = () => {
-    api.getSongs().then(songs => {
-      this.songs = songs || []
+  getInterpreters = () => {
+    return api.getInterpreters().then(interpreters => {
+      this.interpreters = interpreters || []
+      return interpreters
       })
+  }
+
+  getSongs = (query, page, perPage) => {
+    return api.getSongs(query, page, perPage).then(songs => {
+      this.songs = songs || []
+      return songs
+      })
+  }
+
+  getSong = id => {
+    const mapAuthorsIdsToFullObject = authorId => (
+      this.authors.find(author => author.id === authorId)
+    )
+    const mapInterpretersIdsToFullObject = interpreterId => (
+      this.interpreters.find(interpreter => interpreter.id === interpreterId)
+    )
+    return api.getSong(id).then(song => {
+      const mappedSong = song
+      mappedSong.authors.music = mappedSong.authors.music.map(mapAuthorsIdsToFullObject)
+      mappedSong.authors.lyrics = mappedSong.authors.lyrics.map(mapAuthorsIdsToFullObject)
+      mappedSong.interpreters = mappedSong.interpreters.map(mapInterpretersIdsToFullObject)
+      this.selectedSong = mappedSong
+    })
   }
 
   getUser = () => {
     api.getUser().then(user => {
-      this.user = user || {}
+      this.user = { ...user, activeSongbook: user['active_songbook'], lastLogin: user['last_login'], logoutLink: user['logout_link'] }
       })
   }
 
@@ -108,9 +211,30 @@ export class Store {
   }
 
   onSongExport = e => {
-    e.preventDefault();
+    e.preventDefault()
     api.exportSong(this.selectedSong.id).then(file => {
-      window.open(file);
+      window.open(file)
     })
+  }
+
+  onNewSongTitle = ({ label }) => {
+    if (!this.newSongMode) {
+      this.newSongMode = true
+      const newSong = {...emptySong, title: label, id: Math.floor(Math.random()*10000)}
+      this.songs.push(newSong)
+      this.selectedSong = newSong
+    } else {
+      this.songs[this.songs.length - 1].title = label
+      this.selectedSong = this.songs[this.songs.length - 1]
+    }
+  }
+
+  onNewSongAuthor = ({ label }) => {
+    if (!this.newSongMode) {
+
+    } else {
+      this.songs[this.songs.length - 1].title = label
+      this.selectedSong = this.songs[this.songs.length - 1]
+    }
   }
 }
