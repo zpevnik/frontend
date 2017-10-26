@@ -15,15 +15,25 @@ const emptySong = {
   }
 }
 
+const emptySongBook = { 
+  title: '',
+  songs: [],
+  owner: ''
+}
+
 export class Store {
   constructor (props) {
     extendObservable(this, {
       newSongMode: false,
       selectedSong: emptySong,
+      selectedSongBook: emptySongBook,
+      activeSongBook: emptySongBook,
       user: {},
       authors: [],
       interpreters: [],
       songs: [],
+      songBooks: [],
+      users: [],
       searchQuery: '',
       get isSongSelected() {
         return Boolean(this.selectedSong.id)
@@ -145,6 +155,28 @@ export class Store {
     })
   }
 
+  createSongBook = isNew => {
+    if (isNew) {
+      return api.createSongBook(this.selectedSongBook.title)
+    } else {
+      return api.updateSongBook(this.selectedSongBook.id, this.selectedSongBook.title)
+    }
+  }
+
+  addSongToSongBook = songId => {
+    return api.updateSongsInSongBook(this.activeSongBook.songs.concat([{ id: songId }]), this.activeSongBook.id)
+      .then(() => {
+        this.activeSongBook.songs.push({ id: songId })
+      })
+  }
+
+  removeSongFromSongBook = songId => {
+    return api.removeSongFromSongBook(songId, this.selectedSongBook.id)
+      .then(() => {
+        this.selectedSongBook.songs = this.selectedSongBook.songs.filter(song => song.id !== songId)
+      }) 
+  }
+
   getAuthors = () => {
     return api.getAuthors().then(authors => {
       this.authors = authors || []
@@ -166,6 +198,13 @@ export class Store {
       })
   }
 
+  getSongBooks = (query, page, perPage) => {
+    return api.getSongBooks(query, page, perPage).then(songBooks => {
+      this.songBooks = songBooks || []
+      return songBooks
+      })
+  }
+
   getSong = id => {
     const mapAuthorsIdsToFullObject = authorId => (
       this.authors.find(author => author.id === authorId)
@@ -182,14 +221,26 @@ export class Store {
     })
   }
 
+  getSongBook = id => {
+    return api.getSongBook(id).then(songBook => {
+      this.selectedSongBook = songBook
+    })
+  }
+
   getUser = () => {
     api.getUser().then(user => {
-      this.user = { ...user, activeSongbook: user['active_songbook'], lastLogin: user['last_login'], logoutLink: user['logout_link'] }
+      if (user) {
+        this.user = { ...user, activeSongbook: user['active_songbook'], lastLogin: user['last_login'], logoutLink: user['logout_link'] }
+      }
       })
   }
 
   clearSong = () => {
     this.selectedSong = emptySong
+  }
+
+  clearSongBook = () => {
+    this.selectedSongBook = emptySongBook
   }
 
   onSongSelect = payload => {
@@ -236,5 +287,15 @@ export class Store {
       this.songs[this.songs.length - 1].title = label
       this.selectedSong = this.songs[this.songs.length - 1]
     }
+  }
+
+  setActiveSongBook = songBookId => {
+    this.activeSongBook = this.songBooks.find(songBook => songBook.id === songBookId)
+  }
+
+  getUsersName = userId => {
+    return api.getUsersName(userId).then(body => {
+      this.users.push({ id: userId, name: body.name })
+    })
   }
 }

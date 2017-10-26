@@ -1,10 +1,9 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
-import { withRouter } from 'react-router'
 
 const getQueryUrl = query => `?${query.toString()}`
 
-const SongList = withRouter(inject('store')(observer(class extends Component {
+const SongBookList = inject('store')(observer(class extends Component {
 
   componentDidMount = () => {
     const { store, location } = this.props
@@ -12,8 +11,10 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
     const searchQuery = query.get('query')
     const pageQuery = query.get('page')
     const perPageQuery = query.get('per_page')
-    store.getInterpreters().then(() => {
-      store.getSongs(searchQuery, pageQuery, perPageQuery)
+    store.getSongBooks(searchQuery, pageQuery, perPageQuery).then(() => {
+      store.songBooks.map(songBook => songBook.owner)
+        .filter((owner, i, arr) => arr.indexOf(owner) === i)
+        .forEach(owner => store.getUsersName(owner))
     })
     store.getUser()
   }
@@ -25,7 +26,7 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
       const searchQuery = query.get('query')
       const pageQuery = query.get('page')
       const perPageQuery = query.get('per_page')
-      store.getSongs(searchQuery, pageQuery, perPageQuery)
+      store.getSongBooks(searchQuery, pageQuery, perPageQuery)
     }
   }
 
@@ -38,7 +39,7 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
     this.props.history.push(getQueryUrl(query))
   }
 
-  render() {
+  render () {
     const { store, history, location } = this.props
     const query = new URLSearchParams(location.search)
     const onPaginationClick = type => {
@@ -55,14 +56,20 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
           break;
       }
     }
+
+    const getOwnersName = ownerId => {
+      const user = store.users.find(user => user.id === ownerId)
+      return user ? user.name : ''
+    }
+
     return (
-			<div className="container" style={{ marginTop: '60px' }}>
+      <div className="container" style={{ marginTop: '60px' }}>
       <div id="content">
         <div className="row">
           <div className="col-md-12">
             <div className="song-list-header">
-              <h4>Písničky</h4>
-              <button type="button" className="btn btn-primary" onClick={() => history.push('song/new')}>Přidat novou píseň</button>
+              <h4>Zpěvníky</h4>
+              <button type="button" className="btn btn-primary" onClick={() => history.push('songbook/new')}>Vytvořit nový zpěvník</button>
             </div>
             <hr />
             <div className="side-by-side clearfix">
@@ -72,7 +79,7 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                     className="form-control"
                     id="system-search"
                     name="q"
-                    placeholder="Hledej píseň"
+                    placeholder="Hledej zpěvník..."
                     value={store.searchQuery}
                     onChange={store.onSearchQueryChange} />
                   <span className="input-group-btn">
@@ -91,29 +98,27 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Píseň</th>
-                  <th>Interpret</th>
+                  <th>Zpěvník</th>
+                  <th>Autor</th>
                   <th>Akce</th>
                 </tr>
               </thead>
               <tbody>
-                {store.songs.map((song, i) => (
-									<tr key={song.id}>
+                {store.songBooks.map((songBook, i) => (
+									<tr key={songBook.id}>
 										<td>{i + Number(query.get('page')) * 30 + 1}</td>
-										<td>{song.title}</td>
-										{/* <td>{song.authors.map(author => author.name).join(', ')}</td> */}
-										<td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId).name).join(', ')}</td>
+										<td>{songBook.title}</td>
+										{/* <td>{songBook.authors.map(author => author.name).join(', ')}</td> */}
+										<td>{getOwnersName(songBook.owner)}</td>
 										<td className="td-actions">
-											<a className="btn btn-default btn-xs" onClick={() => history.push(`song/${song.id}`)}>
+											<a className="btn btn-default btn-xs" onClick={() => history.push(`songbook/${songBook.id}`)}>
 												<span className="glyphicon glyphicon-pencil" />
 												{' Upravit'}
 											</a>
-											{store.activeSongBook && store.activeSongBook.title && 
-                        <a className="btn btn-default btn-xs" onClick={() => store.addSongToSongBook(song.id)}>
-                          <span className="glyphicon glyphicon-search" />
-                          { ' Přidat do zpěvníku'}
-                        </a>
-                      }
+                      <a className="btn btn-default btn-xs" onClick={() => store.setActiveSongBook(songBook.id)}>
+												<span className="glyphicon glyphicon-pencil" />
+												{' Nastavit jako aktivní zpěvník'}
+											</a>
 										</td>
 									</tr>
 								))}
@@ -135,6 +140,6 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
     </div>
     )
   }
-})))
+}))
 
-export default SongList
+export default SongBookList
