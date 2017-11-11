@@ -54,6 +54,14 @@ export class Store {
           }
         ))
       },
+      get songBooksToSelect() {
+        return this.songBooks.map(songBook => (
+          {
+            value: songBook.id,
+            label: songBook.title
+          }
+        ))
+      },
       get selectedSongInterpretersToSelect() {
         return this.selectedSong.interpreters.map(interpreter => ({
           value: interpreter.id,
@@ -71,6 +79,9 @@ export class Store {
           value: author.id,
           label: author.name
         }))
+      },
+      get activeSongBookToSelect() {
+        return this.activeSongBook.id
       }
     })
   }
@@ -263,9 +274,12 @@ export class Store {
 
   onSongExport = e => {
     e.preventDefault()
-    api.exportSong(this.selectedSong.id).then(file => {
-      window.open(file)
-    })
+    return api.exportSong(this.selectedSong.id)
+  }
+
+  onSongBookExport = e => {
+    e.preventDefault()
+    return api.exportSongBook(this.selectedSongBook.id)
   }
 
   onNewSongTitle = ({ label }) => {

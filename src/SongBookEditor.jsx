@@ -29,6 +29,13 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
     })
   }
 
+  onSongBookExport = e => {
+    this.props.store.onSongBookExport(e)
+      .then(response => {
+        window.location = 'http://zpevnik.skauting.cz/' + response.link
+      })
+  }
+
   render() {
     const { store, history } = this.props
     return (
@@ -59,7 +66,9 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
             <button className="btn btn-default" onClick={e => this.onSave(e, true)}>
               Uložit a odejít
             </button>
-
+            <button className="btn btn-default" onClick={this.onSongBookExport}>
+              Zobrazit v pdf
+            </button>
 
             <br />
             <table className="table table-striped">

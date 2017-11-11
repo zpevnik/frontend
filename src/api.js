@@ -6,12 +6,14 @@ const exportHeaders = new Headers()
 exportHeaders.append('Content-Type', 'application/pdf')
 exportHeaders.append('Accept', 'application/pdf')
 
+const toastr = window.toastr
+
 export default class Api {
 
   apiUrl = 'http://zpevnik.skauting.cz/api/v1'
   // apiUrl = 'https://zpevnik-test.herokuapp.com/api/v1'
 
-  fetch = (endpoint, options, query) => {
+  fetch = (endpoint, options, query, toast) => {
     let queryUrl
     if (query) {
       const esc = encodeURIComponent
@@ -23,6 +25,9 @@ export default class Api {
     return fetch(`${this.apiUrl}/${endpoint}${query && queryUrl ? '?' + queryUrl : ''}`, { headers: myHeaders, mode: 'cors', cache: 'default', credentials: 'include', ...options })
       .then(response => {
         if(response.ok) {
+          if(toast) {
+            toastr.success(toast)
+          }
           if (response.status !== 204) {
             return response.json()
           } else {
@@ -32,6 +37,11 @@ export default class Api {
         // return response.json()
         throw new Error('Network response was not ok.')
       })
+      .catch(error => {
+        console.error(error.message)
+        toastr.error(error.message)
+        throw error
+      })
   }
 
   // function for pdf export
@@ -39,31 +49,27 @@ export default class Api {
     fetch(`${this.apiUrl}/${endpoint}`, { headers: exportHeaders, mode: 'cors', cache: 'default', credentials: 'include', ...options })
       .then(response => {
         if(response.ok) {
-          return response.text();
+          return response.json();
         }
         throw new Error('Network response was not ok.')
+      })
+      .catch(error => {
+        console.error(error.message)
+        toastr.error(error.message)
+        throw error
       })
   )
 
   getAuthors = () => {
     return this.fetch('authors')
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
   }
 
   getInterpreters = () => {
     return this.fetch('interpreters')
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
   }
 
   getUser = () => {
     return this.fetch('user')
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
   }
 
   getSongs = (query, page, perPage) => {
@@ -72,9 +78,6 @@ export default class Api {
       page,
       'per_page': perPage
     })
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
   }
 
   getSongBooks = (query, page, perPage) => {
@@ -83,53 +86,36 @@ export default class Api {
       page,
       'per_page': perPage
     })
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
   }
 
   getSong = songId => {
     return this.fetch(`songs/${songId}`)
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
   }
 
   getUsersName = userId => {
     return this.fetch(`users/${userId}`)
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
   }
 
   getSongBook = songBookId => {
     return this.fetch(`songbooks/${songBookId}`)
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
   }
 
   exportSong = songId => {
     return this.exportFetch(`songs/${songId}`)
-      .catch(error => {
-        console.log('There has been a problem with your fetch operation: ' + error.message)
-      })
+  }
+
+  exportSongBook = songBookId => {
+    return this.exportFetch(`songbooks/${songBookId}`)
   }
 
   createAuthor = name => {
     console.log('Sending ', name)
-    return this.fetch('authors', { method: 'POST', body: JSON.stringify({ name }) })
-      // .catch(error => {
-      //   console.log('There has been a problem with your fetch operation: ' + error.message)
-      // })
+    return this.fetch('authors', { method: 'POST', body: JSON.stringify({ name }) }, undefined, 'Author created successfully')
   }
 
   createInterpreter = name => {
     console.log('Sending ', name)
-    return this.fetch('interpreters', { method: 'POST', body: JSON.stringify({ name }) })
-      // .catch(error => {
-      //   console.log('There has been a problem with your fetch operation: ' + error.message)
-      // })
+    return this.fetch('interpreters', { method: 'POST', body: JSON.stringify({ name }) }, undefined, 'Interpreter created successfully')
   }
 
   deleteAuthor = id => {
@@ -137,41 +123,26 @@ export default class Api {
   }
 
   createSong = song => {
-    return this.fetch('songs', { method: 'POST', body: JSON.stringify(song) })
-      // .catch(error => {
-      //   console.log('There has been a problem with your fetch operation: ' + error.message)
-      // })
+    return this.fetch('songs', { method: 'POST', body: JSON.stringify(song) }, undefined, 'Song created successfully')
   }
 
   createSongBook = title => {
-    return this.fetch('songbooks', { method: 'POST', body: JSON.stringify({ title }) })
-      // .catch(error => {
-      //   console.log('There has been a problem with your fetch operation: ' + error.message)
-      // })
+    return this.fetch('songbooks', { method: 'POST', body: JSON.stringify({ title }) }, undefined, 'Songbook created successfully')
   }
 
   updateSong = (songId, song) => {
-    return this.fetch(`songs/${songId}`, { method: 'PUT', body: JSON.stringify(song) })
-      // .catch(error => {
-      //   console.log('There has been a problem with your fetch operation: ' + error.message)
-      // })
+    return this.fetch(`songs/${songId}`, { method: 'PUT', body: JSON.stringify(song) }, undefined, 'Song updated successfully')
   }
 
   updateSongBook = (songBookId, songBookTitle) => {
-    return this.fetch(`songbooks/${songBookId}`, { method: 'PUT', body: JSON.stringify({ title: songBookTitle }) })
-      // .catch(error => {
-      //   console.log('There has been a problem with your fetch operation: ' + error.message)
-      // })
+    return this.fetch(`songbooks/${songBookId}`, { method: 'PUT', body: JSON.stringify({ title: songBookTitle }) }, undefined, 'Songbook updated successfully')
   }
 
   updateSongsInSongBook = (songs, songBookId) => {
-    return this.fetch(`songbooks/${songBookId}/songs`, { method: 'PUT', body: JSON.stringify(songs) })
-      // .catch(error => {
-      //   console.log('There has been a problem with your fetch operation: ' + error.message)
-      // })
+    return this.fetch(`songbooks/${songBookId}/songs`, { method: 'PUT', body: JSON.stringify(songs) }, undefined, 'Songbook updated successfully')
   }
 
   removeSongFromSongBook = (songId, songBookId) => {
-    return this.fetch(`songbooks/${songBookId}/song/${songId}`, { method: 'DELETE' })
+    return this.fetch(`songbooks/${songBookId}/song/${songId}`, { method: 'DELETE' }, undefined, 'Songbook updated successfully')
   }
 }

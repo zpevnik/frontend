@@ -30,6 +30,13 @@ const SongEditor = inject('store')(observer(class extends Component {
     })
   }
 
+  onSongExport = e => {
+    this.props.store.onSongExport(e)
+      .then(response => {
+        window.location = 'http://zpevnik.skauting.cz/' + response.link
+      })
+  }
+
   render() {
     const { store, match } = this.props
     const isNew = match.params.id === 'new'
@@ -137,7 +144,7 @@ const SongEditor = inject('store')(observer(class extends Component {
               <button className="btn btn-default" onClick={e => this.onSave(e, true)}>
                 Uložit a odejít
               </button>
-              <button className="btn btn-default" onClick={store.onSongExport}>
+              <button className="btn btn-default" onClick={this.onSongExport}>
                 Zobrazit v pdf
               </button>
             </form>

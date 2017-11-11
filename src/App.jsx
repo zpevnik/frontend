@@ -5,6 +5,7 @@ import SongEditor from './SongEditor'
 import SongBookEditor from './SongBookEditor'
 import SongList from './SongList'
 import SongBookList from './SongBookList'
+import Navigation from './Navigation'
 import './App.css'
 
 const App = inject('store')(observer(class extends Component {
@@ -26,23 +27,7 @@ const App = inject('store')(observer(class extends Component {
                   </button>
                   <a href="#"><img src="/img/logo.svg" style={{ width: '40px', marginRight: '10px'}} /></a>
                 </div>
-                <div id="navbar" className="navbar-collapse collapse">
-                  <ul className="nav navbar-nav">
-                    <li><NavLink exact to="/" activeClassName="active" className="navlink">Písně</NavLink></li>
-                    <li><NavLink to="/songbook" activeClassName="active" className="navlink">Zpěvníky</NavLink></li>
-                    {/* <li><NavLink to="/" activeClassName="active" className="navlink">Autoři</NavLink></li> */}
-                  </ul>
-                  <ul className="nav navbar-nav navbar-right">
-                    <li style={{ minWidth: '200px', padding: '8px 15px' }}>
-                      <select className="form-control" disabled="disabled">
-                        <option>{ store.activeSongBook.title || 'Není vybrán žádný zpěvník' }</option>
-                        <option>Jiný střediskový zpěvník</option>
-                      </select>
-                    </li>
-                    <li><a>{store.user.name}</a></li>
-                    <li><a href={store.user.logoutLink}>odhlásit</a></li>
-                  </ul>
-                </div>
+                <Navigation />
               </div>
             </nav>
           </div>

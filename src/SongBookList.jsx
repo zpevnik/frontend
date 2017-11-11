@@ -7,6 +7,7 @@ const SongBookList = inject('store')(observer(class extends Component {
 
   componentDidMount = () => {
     const { store, location } = this.props
+    store.searchQuery = ''
     const query = new URLSearchParams(location.search)
     const searchQuery = query.get('query')
     const pageQuery = query.get('page')
