@@ -78,6 +78,9 @@ export default class Api {
       page,
       'per_page': perPage
     })
+      .then(data => {
+        return data.data
+      })
   }
 
   getSongBooks = (query, page, perPage) => {
@@ -86,6 +89,9 @@ export default class Api {
       page,
       'per_page': perPage
     })
+      .then(data => {
+        return data.data
+      })
   }
 
   getSong = songId => {

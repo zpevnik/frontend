@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { withRouter } from 'react-router'
 import Select from 'react-select'
 import { Creatable } from 'react-select'
-import * as lib from './lib'
+import * as lib from '../../lib'
 import { observer, inject } from 'mobx-react'
 
 const SongEditor = inject('store')(observer(class extends Component {

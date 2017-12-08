@@ -63,22 +63,28 @@ export class Store {
         ))
       },
       get selectedSongInterpretersToSelect() {
-        return this.selectedSong.interpreters.map(interpreter => ({
-          value: interpreter.id,
-          label: interpreter.name
-        }))
+        return this.selectedSong.interpreters
+          .filter(a => a)
+          .map(interpreter => ({
+            value: interpreter.id,
+            label: interpreter.name
+          }))
       },
       get selectedSongMusicAuthorsToSelect() {
-        return this.selectedSong.authors.music.map(author => ({
-          value: author.id,
-          label: author.name
-        }))
+        return this.selectedSong.authors.music
+          .filter(a => a)
+          .map(author => ({
+            value: author.id,
+            label: author.name
+          }))
       },
       get selectedSongLyricsAuthorsToSelect() {
-        return this.selectedSong.authors.lyrics.map(author => ({
-          value: author.id,
-          label: author.name
-        }))
+        return this.selectedSong.authors.lyrics
+          .filter(a => a)
+          .map(author => ({
+            value: author.id,
+            label: author.name
+          }))
       },
       get activeSongBookToSelect() {
         return this.activeSongBook.id
@@ -135,15 +141,21 @@ export class Store {
       return Promise.all([this.getAuthors(), this.getInterpreters()])
     }).then(() => {
       const mapNewlyCreatedAuthors = author => {
+        const id = this.authors.find(author2 => author2.name === author.name)
+          ? this.authors.find(author2 => author2.name === author.name).id
+          : null
         if (newAuthors.includes(author.name)) {
-          return { name: author.name, id: this.authors.find(author2 => author2.name === author.name).id }
+          return { name: author.name, id }
         } else {
           return author
         }
       }
       const mapNewlyCreatedInterpreters = interpreter => {
+        const id = this.interpreters.find(interpreter2 => interpreter2.name === interpreter.name)
+        ? this.interpreters.find(interpreter2 => interpreter2.name === interpreter.name).id
+        : null
         if (newInterpreters.includes(interpreter.name)) {
-          return { name: interpreter.name, id: this.interpreters.find(interpreter2 => interpreter2.name === interpreter.name).id }
+          return { name: interpreter.name, id }
         } else {
           return interpreter
         }

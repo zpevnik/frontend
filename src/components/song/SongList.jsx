@@ -103,7 +103,9 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
 										<td>{i + Number(query.get('page')) * 30 + 1}</td>
 										<td>{song.title}</td>
 										{/* <td>{song.authors.map(author => author.name).join(', ')}</td> */}
-										<td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId).name).join(', ')}</td>
+                    <td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId)
+                      ? store.interpreters.find(inter => inter.id === interpreterId).name
+                      : null).filter(a => a).join(', ')}</td>
 										<td className="td-actions">
 											<a className="btn btn-default btn-xs" onClick={() => history.push(`song/${song.id}`)}>
 												<span className="glyphicon glyphicon-pencil" />

@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { BrowserRouter as Router, Route, NavLink, withRouter } from 'react-router-dom'
-import SongEditor from './SongEditor'
-import SongBookEditor from './SongBookEditor'
-import SongList from './SongList'
-import SongBookList from './SongBookList'
-import Navigation from './Navigation'
+import SongEditor from './components/song/SongEditor'
+import SongBookEditor from './components/songbook/SongBookEditor'
+import SongList from './components/song/SongList'
+import SongBookList from './components/songbook/SongBookList'
+import Navigation from './components/Navigation'
 import './App.css'
 
 const App = inject('store')(observer(class extends Component {
