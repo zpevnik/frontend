@@ -39,7 +39,8 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
   }
 
   render() {
-    const { store, history } = this.props
+    const { store, history, match } = this.props
+    const isNew = match.params.id === 'new'
     return (
 			<div className="container" style={{ marginTop: '60px' }}>
       <div id="content">
@@ -68,9 +69,11 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
             <button className="btn btn-default" onClick={e => this.onSave(e, true)}>
               Uložit a odejít
             </button>
-            <button className="btn btn-default" onClick={this.onSongBookExport}>
-              Zobrazit v pdf
-            </button>
+            {!isNew &&
+              <button className="btn btn-default" onClick={this.onSongBookExport}>
+                Zobrazit v pdf
+              </button>
+            }
 
             <br />
             <table className="table table-striped">
