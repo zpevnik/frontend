@@ -22,11 +22,13 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
     e.preventDefault()
     const { store, match } = this.props
     const isNew = match.params.id === 'new'
-    store.createSongBook(isNew).then(() => {
-      if (redirect) {
-        this.props.history.push('/songbook')
-      }
-    })
+    store.createSongBook(isNew)
+      .then(() => store.getSongBooks())
+      .then(() => {
+        if (redirect) {
+          this.props.history.push('/songbook')
+        }
+      })
   }
 
   onSongBookExport = e => {

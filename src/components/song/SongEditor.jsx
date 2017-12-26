@@ -143,9 +143,11 @@ const SongEditor = inject('store')(observer(class extends Component {
               <button className="btn btn-default" onClick={e => this.onSave(e, true)}>
                 Uložit a odejít
               </button>
-              <button className="btn btn-default" onClick={this.onSongExport}>
-                Zobrazit v pdf
-              </button>
+              {!isNew &&
+                <button className="btn btn-default" onClick={this.onSongExport}>
+                  Zobrazit v pdf
+                </button>
+              }
             </form>
           </div>
           <div className="col-md-4 col-sm-12">
