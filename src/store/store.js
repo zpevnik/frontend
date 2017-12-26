@@ -1,6 +1,6 @@
 import { extendObservable, toJS } from 'mobx'
-import Api from './api'
-import * as lib from './lib'
+import Api from '../lib/api'
+import { convertSongToJson } from '../lib/utils'
 
 const api = new Api()
 
@@ -277,7 +277,7 @@ export class Store {
 
   onSongSave = e => {
     e.preventDefault()
-    api.updateSong(this.selectedSong.id, lib.convertSongToJson(this.selectedSong)).then(data => {
+    api.updateSong(this.selectedSong.id, convertSongToJson(this.selectedSong)).then(data => {
       this.getSongs()
       this.getAuthors()
     })
