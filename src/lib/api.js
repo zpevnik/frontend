@@ -79,7 +79,7 @@ export default class Api {
       'per_page': perPage
     })
       .then(data => {
-        return data.data
+        return data
       })
   }
 
@@ -90,7 +90,7 @@ export default class Api {
       'per_page': perPage
     })
       .then(data => {
-        return data.data
+        return data
       })
   }
 

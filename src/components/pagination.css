@@ -1,0 +1,16 @@
+.-disabled {
+	cursor: not-allowed;
+	color: lightgrey !important;
+}
+
+.-disabled:hover {
+	background-color: white !important;
+}
+
+a.pagination-button {
+	cursor: default;
+}
+
+.pagination-button.-active {
+	background-color: #eee;
+}

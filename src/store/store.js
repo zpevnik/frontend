@@ -35,6 +35,8 @@ export class Store {
       songBooks: [],
       users: [],
       searchQuery: '',
+      lastRequestId: 0,
+      totalNumberOfFoundItems: null,
       get isSongSelected() {
         return Boolean(this.selectedSong.id)
       },
@@ -215,16 +217,28 @@ export class Store {
   }
 
   getSongs = (query, page, perPage) => {
-    return api.getSongs(query, page, perPage).then(songs => {
-      this.songs = songs || []
-      return songs
+    perPage = perPage || 50
+    this.lastRequestId += 1
+    const requestId = this.lastRequestId
+    return api.getSongs(query, page, perPage).then(songsData => {
+      this.songs = songsData.data || []
+      if (requestId === this.lastRequestId) {
+        this.totalNumberOfFoundItems = songsData.count
+      }
+      return songsData.data
       })
   }
 
   getSongBooks = (query, page, perPage) => {
-    return api.getSongBooks(query, page, perPage).then(songBooks => {
-      this.songBooks = songBooks || []
-      return songBooks
+    perPage = perPage || 50
+    this.lastRequestId += 1
+    const requestId = this.lastRequestId
+    return api.getSongBooks(query, page, perPage).then(songBooksData => {
+      this.songBooks = songBooksData.data || []
+      if (requestId === this.lastRequestId) {
+        this.totalNumberOfFoundItems = songBooksData.count
+      }
+      return songBooksData.data
       })
   }
 

@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
+import Pagination from '../pagination'
 
 const getQueryUrl = query => `?${query.toString()}`
 
@@ -43,19 +44,9 @@ const SongBookList = inject('store')(observer(class extends Component {
   render () {
     const { store, history, location } = this.props
     const query = new URLSearchParams(location.search)
-    const onPaginationClick = type => {
-      switch (type) {
-        case 'prev':
-          if(query.get('page') && query.get('page') !== '0') {
-            query.set('page', `${query.get('page') - 1}`)
-            history.push(getQueryUrl(query))
-          }
-          break;
-        case 'next':
-          query.set('page', `${Number(query.get('page')) + 1}`)
-          history.push(getQueryUrl(query))
-          break;
-      }
+    const onPageChange = page => {
+      query.set('page', page)
+      history.push(getQueryUrl(query))
     }
 
     const getOwnersName = ownerId => {
@@ -107,7 +98,7 @@ const SongBookList = inject('store')(observer(class extends Component {
               <tbody>
                 {store.songBooks.map((songBook, i) => (
 									<tr key={songBook.id}>
-										<td>{i + Number(query.get('page')) * 30 + 1}</td>
+										<td>{i + Number(query.get('page')) * (Number(query.get('per_page')) || 50) + 1}</td>
 										<td>{songBook.title}</td>
 										{/* <td>{songBook.authors.map(author => author.name).join(', ')}</td> */}
 										<td>{getOwnersName(songBook.owner)}</td>
@@ -126,15 +117,11 @@ const SongBookList = inject('store')(observer(class extends Component {
               </tbody>
             </table>
 
-            <ul className="pagination">
-              <li><a onClick={e => onPaginationClick('prev')}>Předchozí</a></li>
-              {/* <li><a >1</a></li>
-              <li><a >2</a></li>
-              <li><a >3</a></li>
-              <li><a >4</a></li>
-              <li><a >5</a></li> */}
-              <li><a onClick={e => onPaginationClick('next')}>Další</a></li>
-            </ul>
+            <Pagination
+              lastPage={Math.ceil(Number(store.totalNumberOfFoundItems) / 50) || 1}
+              pageSize={Number(query.get('per_page')) || 50}
+              page={Number(query.get('page')) || 0}
+              onPageChange={onPageChange} />
           </div>
         </div>
       </div>
