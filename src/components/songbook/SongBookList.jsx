@@ -41,6 +41,13 @@ const SongBookList = inject('store')(observer(class extends Component {
     this.props.history.push(getQueryUrl(query))
   }
 
+  onSongBookExport = id => {
+    this.props.store.onSongBookExport(id)
+      .then(response => {
+        window.open('http://zpevnik.skauting.cz/' + response.link, '_blank')
+      })
+  }
+
   render () {
     const { store, history, location } = this.props
     const query = new URLSearchParams(location.search)
@@ -110,6 +117,10 @@ const SongBookList = inject('store')(observer(class extends Component {
                       <a className="btn btn-default btn-xs" onClick={() => store.setActiveSongBook(songBook.id)}>
 												<span className="glyphicon glyphicon-pencil" />
 												{' Nastavit jako aktivní zpěvník'}
+											</a>
+                      <a className="btn btn-default btn-xs" onClick={() => this.onSongBookExport(songBook.id)}>
+												<span className="glyphicon glyphicon-pencil" />
+												{' Export do pdf'}
 											</a>
 										</td>
 									</tr>

@@ -299,13 +299,12 @@ export class Store {
   }
 
   onSongExport = e => {
-    e.preventDefault()
+    e && e.preventDefault()
     return api.exportSong(this.selectedSong.id)
   }
 
-  onSongBookExport = e => {
-    e.preventDefault()
-    return api.exportSongBook(this.selectedSongBook.id)
+  onSongBookExport = (id) => {
+    return api.exportSongBook(id ? id : this.selectedSongBook.id)
   }
 
   onNewSongTitle = ({ label }) => {

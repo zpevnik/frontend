@@ -32,9 +32,9 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
   }
 
   onSongBookExport = e => {
-    this.props.store.onSongBookExport(e)
+    this.props.store.onSongBookExport()
       .then(response => {
-        window.location = 'http://zpevnik.skauting.cz/' + response.link
+        window.open('http://zpevnik.skauting.cz/' + response.link, '_blank')
       })
   }
 

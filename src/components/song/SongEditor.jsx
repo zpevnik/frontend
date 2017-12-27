@@ -32,7 +32,7 @@ const SongEditor = inject('store')(observer(class extends Component {
   onSongExport = e => {
     this.props.store.onSongExport(e)
       .then(response => {
-        window.location = 'http://zpevnik.skauting.cz/' + response.link
+        window.open('http://zpevnik.skauting.cz/' + response.link, '_blank')
       })
   }
 
