@@ -45,3 +45,11 @@ p {
   color: #555 !important;
   background-color: #e7e7e7 !important;
 }
+
+.list-item {
+  cursor: pointer;
+}
+
+.list-item:hover {
+  background-color: #F1F1F1 !important;
+}

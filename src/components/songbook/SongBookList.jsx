@@ -104,7 +104,7 @@ const SongBookList = inject('store')(observer(class extends Component {
               </thead>
               <tbody>
                 {store.songBooks.map((songBook, i) => (
-									<tr key={songBook.id}>
+									<tr key={songBook.id} className="list-item" onClick={() => history.push(`songbook/${songBook.id}`)}>
 										<td>{i + Number(query.get('page')) * (Number(query.get('per_page')) || 50) + 1}</td>
 										<td>{songBook.title}</td>
 										{/* <td>{songBook.authors.map(author => author.name).join(', ')}</td> */}
@@ -114,11 +114,17 @@ const SongBookList = inject('store')(observer(class extends Component {
 												<span className="glyphicon glyphicon-pencil" />
 												{' Upravit'}
 											</a>
-                      <a className="btn btn-default btn-xs" onClick={() => store.setActiveSongBook(songBook.id)}>
+                      <a className="btn btn-default btn-xs" onClick={(e) => {
+                        e.stopPropagation()
+                        store.setActiveSongBook(songBook.id)
+                      }}>
 												<span className="glyphicon glyphicon-pencil" />
 												{' Nastavit jako aktivní zpěvník'}
 											</a>
-                      <a className="btn btn-default btn-xs" onClick={() => this.onSongBookExport(songBook.id)}>
+                      <a className="btn btn-default btn-xs" onClick={(e) => {
+                        e.stopPropagation()
+                        this.onSongBookExport(songBook.id)
+                      }}>
 												<span className="glyphicon glyphicon-pencil" />
 												{' Export do pdf'}
 											</a>

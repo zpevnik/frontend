@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { withRouter } from 'react-router'
 import Pagination from '../pagination'
-import { isSongEditable } from '../../lib/utils'
+import { isSongEditable, getSongsOwnerName } from '../../lib/utils'
 
 const getQueryUrl = query => `?${query.toString()}`
 
@@ -16,7 +16,13 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
     const pageQuery = query.get('page')
     const perPageQuery = query.get('per_page')
     store.getInterpreters().then(() => {
-      store.getSongs(searchQuery, pageQuery, perPageQuery)
+      store.getSongs(searchQuery, pageQuery, perPageQuery).then(() => {
+        store.songs.forEach(song => {
+          if (song.owner && !store.users.find(user => user.id === song.owner)) {
+            store.getUsersName(song.owner)
+          }
+        })
+      })
     })
     store.getUser()
   }
@@ -87,11 +93,12 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                   <th>Píseň</th>
                   <th>Interpret</th>
                   <th>Akce</th>
+                  <th>Vlastník</th>
                 </tr>
               </thead>
               <tbody>
                 {store.songs.map((song, i) => (
-									<tr key={song.id}>
+									<tr key={song.id} onClick={() => history.push(`song/${song.id}`)} className="list-item">
 										<td>{i + Number(query.get('page')) * (Number(query.get('per_page')) || 50) + 1}</td>
 										<td>{song.title}</td>
 										{/* <td>{song.authors.map(author => author.name).join(', ')}</td> */}
@@ -106,12 +113,16 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                         </a>
                       }
 											{store.activeSongBook && store.activeSongBook.title && 
-                        <a className="btn btn-default btn-xs" onClick={() => store.addSongToSongBook(song.id)}>
+                        <a className="btn btn-default btn-xs" onClick={(e) => {
+                          e.stopPropagation()
+                          store.addSongToSongBook(song.id)
+                        }}>
                           <span className="glyphicon glyphicon-search" />
                           { ' Přidat do zpěvníku'}
                         </a>
                       }
 										</td>
+                    <td>{getSongsOwnerName(song, store.users)}</td>
 									</tr>
 								))}
               </tbody>
