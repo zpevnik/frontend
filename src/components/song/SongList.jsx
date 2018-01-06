@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { withRouter } from 'react-router'
 import Pagination from '../pagination'
+import { isSongEditable } from '../../lib/utils'
 
 const getQueryUrl = query => `?${query.toString()}`
 
@@ -98,10 +99,12 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                       ? store.interpreters.find(inter => inter.id === interpreterId).name
                       : null).filter(a => a).join(', ')}</td>
 										<td className="td-actions">
-											<a className="btn btn-default btn-xs" onClick={() => history.push(`song/${song.id}`)}>
-												<span className="glyphicon glyphicon-pencil" />
-												{' Upravit'}
-											</a>
+                      {isSongEditable(song, store.user) &&
+                        <a className="btn btn-default btn-xs" onClick={() => history.push(`song/${song.id}`)}>
+                          <span className="glyphicon glyphicon-pencil" />
+                          {' Upravit'}
+                        </a>
+                      }
 											{store.activeSongBook && store.activeSongBook.title && 
                         <a className="btn btn-default btn-xs" onClick={() => store.addSongToSongBook(song.id)}>
                           <span className="glyphicon glyphicon-search" />

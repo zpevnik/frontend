@@ -3,19 +3,27 @@ import { withRouter } from 'react-router'
 import Select from 'react-select'
 import { Creatable } from 'react-select'
 import { observer, inject } from 'mobx-react'
+import { isSongEditable } from '../../lib/utils'
 
 const SongEditor = inject('store')(observer(class extends Component {
 
+  componentWillMount = () => {
+    const { store } = this.props
+    store.loaded = false
+  }
+
   componentDidMount = () => {
     const { store, match } = this.props
-    Promise.all([store.getAuthors(), store.getInterpreters()]).then(() => {
+    Promise.all([store.getAuthors(), store.getInterpreters(), store.getUser()]).then(() => {
       if(match.params.id !== 'new') {
-        store.getSong(match.params.id)
+        store.getSong(match.params.id).then(() => {
+          store.loaded = true
+        })
       } else {
         store.clearSong()
+        store.loaded = true
       }
     })
-    store.getUser()
   }
 
   onSave = (e, redirect) => {
@@ -39,6 +47,18 @@ const SongEditor = inject('store')(observer(class extends Component {
   render() {
     const { store, match } = this.props
     const isNew = match.params.id === 'new'
+    const isUserPermitedToSee = isNew || (store.selectedSong.id === Number(match.params.id))
+    const isUserPermitedToEdit = isUserPermitedToSee && isSongEditable(store.selectedSong, store.user)
+
+    if (!store.isLoaded) {
+      return <div style={{ marginTop: '60px' }}>Loading...</div>
+    }
+    if (!isUserPermitedToSee) {
+      return <div style={{ marginTop: '60px' }}>You are not allowed to view this song</div>
+    }
+    if (!isUserPermitedToEdit) {
+      return <div style={{ marginTop: '60px' }}>You are not allowed to edit this song</div>
+    }
     // const verseRegex = /\[verse\]([\s\S]*?)\[verse\]/g
     // const chordRegex = /\[(.+?)\]/g
     // const verses = store.selectedSong.text.match(verseRegex)

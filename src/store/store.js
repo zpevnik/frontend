@@ -36,6 +36,7 @@ export class Store {
       users: [],
       searchQuery: '',
       lastRequestId: 0,
+      loaded: false,
       totalNumberOfFoundItems: null,
       get isSongSelected() {
         return Boolean(this.selectedSong.id)
