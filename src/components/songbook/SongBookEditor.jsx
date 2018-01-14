@@ -6,13 +6,19 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
 
   componentDidMount = () => {    
 		const { store, match } = this.props
+    store.isLoaded = false
+    store.exportStatus = null
+    store.exportLink = null
     Promise.all([store.getAuthors(), store.getInterpreters()]).then(() => {
 			return store.getSongs()
 		}).then(() => {
       if(match.params.id !== 'new') {
-        store.getSongBook(match.params.id)
+        store.getSongBook(match.params.id).then(() => {
+          store.isLoaded = true
+        })
       } else {
         store.clearSongBook()
+        store.isLoaded = true
       }
     })
     store.getUser()
@@ -33,14 +39,16 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
 
   onSongBookExport = e => {
     this.props.store.onSongBookExport()
-      .then(response => {
-        window.open('http://zpevnik.skauting.cz/' + response.link, '_blank')
-      })
   }
 
   render() {
     const { store, history, match } = this.props
     const isNew = match.params.id === 'new'
+
+    if (!store.isLoaded) {
+      return <div style={{ marginTop: '60px' }}>Loading...</div>
+    }
+    
     return (
 			<div className="container" style={{ marginTop: '60px' }}>
       <div id="content">
@@ -69,10 +77,30 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
             <button className="btn btn-default" onClick={e => this.onSave(e, true)}>
               Uložit a odejít
             </button>
+            <button className="btn btn-default" onClick={(e) => {
+              store.setActiveSongBook(store.selectedSongBook.id)
+              history.push('/')}}>
+              Přidat písně
+            </button>
             {!isNew &&
               <button className="btn btn-default" onClick={this.onSongBookExport}>
                 Zobrazit v pdf
               </button>
+            }
+            {store.exportStatus &&
+              <span>
+                {store.exportStatus === 'loading' &&
+                  <span className="alert alert-primary" style={{ padding: '7px 15px' }}>Zpěvník se připravuje...</span>
+                }
+                {store.exportStatus === 'failed' &&
+                  <span className="alert alert-danger" style={{ padding: '7px 15px' }}>Zpěvník se nepodařilo zkompilovat.</span>
+                }
+                {store.exportStatus === 'loaded' &&
+                  <span className="alert alert-success" style={{ padding: '7px 15px' }}>Zpěvník je připraven! Stáhnout jej můžeš
+                    <a target="_blank" href={store.exportLink}> zde</a>
+                  </span>
+                }
+              </span>
             }
 
             <br />

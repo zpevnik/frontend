@@ -41,11 +41,9 @@ const SongBookList = inject('store')(observer(class extends Component {
     this.props.history.push(getQueryUrl(query))
   }
 
-  onSongBookExport = id => {
-    this.props.store.onSongBookExport(id)
-      .then(response => {
-        window.open('http://zpevnik.skauting.cz/' + response.link, '_blank')
-      })
+  onEditClick = (e, id) => {
+    e.stopPropagation()
+    this.props.history.push(`songbook/${id}`)
   }
 
   render () {
@@ -104,13 +102,13 @@ const SongBookList = inject('store')(observer(class extends Component {
               </thead>
               <tbody>
                 {store.songBooks.map((songBook, i) => (
-									<tr key={songBook.id} className="list-item" onClick={() => history.push(`songbook/${songBook.id}`)}>
+									<tr key={songBook.id} className="list-item" onClick={e => this.onEditClick(e, songBook.id)}>
 										<td>{i + Number(query.get('page')) * (Number(query.get('per_page')) || 50) + 1}</td>
 										<td>{songBook.title}</td>
 										{/* <td>{songBook.authors.map(author => author.name).join(', ')}</td> */}
 										<td>{getOwnersName(songBook.owner)}</td>
 										<td className="td-actions">
-											<a className="btn btn-default btn-xs" onClick={() => history.push(`songbook/${songBook.id}`)}>
+											<a className="btn btn-default btn-xs" onClick={e => this.onEditClick(e, songBook.id)}>
 												<span className="glyphicon glyphicon-pencil" />
 												{' Upravit'}
 											</a>
@@ -120,13 +118,6 @@ const SongBookList = inject('store')(observer(class extends Component {
                       }}>
 												<span className="glyphicon glyphicon-pencil" />
 												{' Nastavit jako aktivní zpěvník'}
-											</a>
-                      <a className="btn btn-default btn-xs" onClick={(e) => {
-                        e.stopPropagation()
-                        this.onSongBookExport(songBook.id)
-                      }}>
-												<span className="glyphicon glyphicon-pencil" />
-												{' Export do pdf'}
 											</a>
 										</td>
 									</tr>

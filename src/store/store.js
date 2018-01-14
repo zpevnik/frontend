@@ -3,6 +3,7 @@ import Api from '../lib/api'
 import { convertSongToJson } from '../lib/utils'
 
 const api = new Api()
+const toastr = window.toastr
 
 const emptySong = { 
   title: '',
@@ -12,7 +13,9 @@ const emptySong = {
   authors: {
     music: [],
     lyrics: []
-  }
+  },
+  visibility: 2,
+  edit_perm: 2
 }
 
 const emptySongBook = { 
@@ -31,12 +34,14 @@ export class Store {
       user: {},
       authors: [],
       interpreters: [],
+      isLoaded: false,
+      exportStatus: null,
+      exportLink: null,
       songs: [],
       songBooks: [],
       users: [],
       searchQuery: '',
       lastRequestId: 0,
-      loaded: false,
       totalNumberOfFoundItems: null,
       get isSongSelected() {
         return Boolean(this.selectedSong.id)
@@ -106,6 +111,8 @@ export class Store {
   onSongChange = (name, payload) => {
     if (name === 'title' || name === 'text' || name === 'description') {
       this.selectedSong[name] = payload.target.value
+    } else if (name === 'visibility' || name === 'edit_perm'){
+      this.selectedSong[name] = payload.value
     } else if (name === 'interpreters') {
       this.selectedSong[name] = payload.map(item => ({
         id: item.value,
@@ -176,9 +183,11 @@ export class Store {
       } else {
         return api.updateSong(newSong.id, newSong)
       }
-    }).catch(error => {
-      console.log('Oh no, there was problem with your request: ', error)
-    })
+    }).catch(this.catchError)
+  }
+
+  catchError = error => {
+    toastr.error('Jejda, někde je problém: ', error)
   }
 
   createSongBook = isNew => {
@@ -190,17 +199,19 @@ export class Store {
   }
 
   addSongToSongBook = songId => {
-    return api.updateSongsInSongBook(this.activeSongBook.songs.concat([{ id: songId }]), this.activeSongBook.id)
+    return api.updateSongsInSongBook([{ id: songId }], [], this.activeSongBook.id)
       .then(() => {
         this.activeSongBook.songs.push({ id: songId })
       })
+      .catch(this.catchError)
   }
 
   removeSongFromSongBook = songId => {
-    return api.removeSongFromSongBook(songId, this.selectedSongBook.id)
+    return api.updateSongsInSongBook([], [songId], this.selectedSongBook.id)
       .then(() => {
         this.selectedSongBook.songs = this.selectedSongBook.songs.filter(song => song.id !== songId)
-      }) 
+      })
+      .catch(this.catchError)
   }
 
   getAuthors = () => {
@@ -208,6 +219,7 @@ export class Store {
       this.authors = authors || []
       return authors
       })
+      .catch(this.catchError)
   }
 
   getInterpreters = () => {
@@ -215,6 +227,7 @@ export class Store {
       this.interpreters = interpreters || []
       return interpreters
       })
+      .catch(this.catchError)
   }
 
   getSongs = (query, page, perPage) => {
@@ -228,6 +241,7 @@ export class Store {
       }
       return songsData.data
       })
+      .catch(this.catchError)
   }
 
   getSongBooks = (query, page, perPage) => {
@@ -241,6 +255,7 @@ export class Store {
       }
       return songBooksData.data
       })
+      .catch(this.catchError)
   }
 
   getSong = id => {
@@ -257,12 +272,14 @@ export class Store {
       mappedSong.interpreters = mappedSong.interpreters.map(mapInterpretersIdsToFullObject)
       this.selectedSong = mappedSong
     })
+    .catch(this.catchError)
   }
 
   getSongBook = id => {
     return api.getSongBook(id).then(songBook => {
       this.selectedSongBook = songBook
     })
+    .catch(this.catchError)
   }
 
   getUser = () => {
@@ -271,6 +288,7 @@ export class Store {
         this.user = { ...user, activeSongbook: user['active_songbook'], lastLogin: user['last_login'], logoutLink: user['logout_link'] }
       }
       })
+      .catch(this.catchError)
   }
 
   clearSong = () => {
@@ -296,16 +314,31 @@ export class Store {
       this.getSongs()
       this.getAuthors()
     })
+    .catch(this.catchError)
     this.clearSong()
   }
 
   onSongExport = e => {
     e && e.preventDefault()
-    return api.exportSong(this.selectedSong.id)
+    this.exportStatus = 'loading'
+    return api.exportSong(this.selectedSong.id).then(response => {
+      this.exportLink = 'http://zpevnik.skauting.cz/' + response.link
+      this.exportStatus = 'loaded'
+    }).catch(err => {
+      this.exportStatus = 'failed'
+      this.catchError(err)
+    })
   }
 
   onSongBookExport = (id) => {
-    return api.exportSongBook(id ? id : this.selectedSongBook.id)
+    this.exportStatus = 'loading'
+    return api.exportSongBook(id ? id : this.selectedSongBook.id).then(response => {
+      this.exportLink = 'http://zpevnik.skauting.cz/' + response.link
+      this.exportStatus = 'loaded'
+    }).catch(err => {
+      this.exportStatus = 'failed'
+      this.catchError(err)
+    })
   }
 
   onNewSongTitle = ({ label }) => {

@@ -5,50 +5,74 @@ import { Creatable } from 'react-select'
 import { observer, inject } from 'mobx-react'
 import { isSongEditable } from '../../lib/utils'
 
-const SongEditor = inject('store')(observer(class extends Component {
-
-  componentWillMount = () => {
-    const { store } = this.props
-    store.loaded = false
-  }
+const SongEditor = withRouter(inject('store')(observer(class extends Component {
 
   componentDidMount = () => {
     const { store, match } = this.props
+    store.isLoaded = false
+    store.exportStatus = null
+    store.exportLink = null
     Promise.all([store.getAuthors(), store.getInterpreters(), store.getUser()]).then(() => {
       if(match.params.id !== 'new') {
         store.getSong(match.params.id).then(() => {
-          store.loaded = true
+          store.isLoaded = true
         })
       } else {
         store.clearSong()
-        store.loaded = true
+        store.isLoaded = true
       }
     })
+  }
+
+  componentDidUpdate = newProps => {
+    const { store, match, location } = this.props
+    if (location.pathname !== newProps.location.pathname) {
+      store.isLoaded = false
+      store.getSong(match.params.id).then(() => {
+        store.isLoaded = true
+      })
+    }
   }
 
   onSave = (e, redirect) => {
     e.preventDefault()
     const { store, match } = this.props
     const isNew = match.params.id === 'new'
-    store.createSong(isNew).then(() => {
+    store.createSong(isNew).then(song => {
       if (redirect) {
         this.props.history.push('/')
+      } else if (isNew) {
+        const id = song.link.split('songs/').filter(s => s)[0]
+        this.props.history.push(`/song/${id}`)
       }
     })
   }
 
   onSongExport = e => {
     this.props.store.onSongExport(e)
-      .then(response => {
-        window.open('http://zpevnik.skauting.cz/' + response.link, '_blank')
-      })
   }
 
   render() {
     const { store, match } = this.props
     const isNew = match.params.id === 'new'
-    const isUserPermitedToSee = isNew || (store.selectedSong.id === Number(match.params.id))
+    const isUserPermitedToSee = isNew || (store.selectedSong.id === match.params.id)
     const isUserPermitedToEdit = isUserPermitedToSee && isSongEditable(store.selectedSong, store.user)
+    const isMine = isNew || store.selectedSong.owner === store.user.id
+
+    const permissionOptions = [
+      {
+        value: 2,
+        label: 'Všichni'
+      },
+      {
+        value: 1,
+        label: 'Pouze jednotka'
+      },
+      {
+        value: 0,
+        label: 'Pouze já'
+      }
+    ]
 
     if (!store.isLoaded) {
       return <div style={{ marginTop: '60px' }}>Loading...</div>
@@ -148,6 +172,28 @@ const SongEditor = inject('store')(observer(class extends Component {
                   value={store.selectedSong.description}
                     onChange={payload => store.onSongChange('description', payload)} />
               </div>
+              {isMine &&
+                <div className="row">
+                  <div className="col-md-6 col-sm-12">
+                    <div className="form-group">
+                      <label>Viditelnost:</label>
+                      <Select
+                        options={permissionOptions}
+                        value={store.selectedSong.visibility}
+                        onChange={payload => store.onSongChange('visibility', payload)} />
+                    </div>
+                  </div>
+                  <div className="col-md-6 col-sm-12">
+                    <div className="form-group">
+                      <label>Může upravovat:</label>
+                      <Select
+                        options={permissionOptions}
+                        value={store.selectedSong.edit_perm}
+                        onChange={payload => store.onSongChange('edit_perm', payload)} />
+                    </div>
+                  </div>
+                </div>
+              }
               <div className="form-group">
                 <label>Píseň:</label>
                 <textarea
@@ -168,7 +214,23 @@ const SongEditor = inject('store')(observer(class extends Component {
                   Zobrazit v pdf
                 </button>
               }
+              {store.exportStatus &&
+                <span>
+                  {store.exportStatus === 'loading' &&
+                    <span className="alert alert-primary" style={{ padding: '7px 15px' }}>Píseň se připravuje...</span>
+                  }
+                  {store.exportStatus === 'failed' &&
+                    <span className="alert alert-danger" style={{ padding: '7px 15px' }}>Píseň se nepodařilo zkompilovat.</span>
+                  }
+                  {store.exportStatus === 'loaded' &&
+                    <span className="alert alert-success" style={{ padding: '7px 15px' }}>Píseň je připravena! Stáhnout ji můžeš
+                      <a target="_blank" href={store.exportLink}> zde</a>
+                    </span>
+                  }
+                </span>
+              }
             </form>
+            
           </div>
           <div className="col-md-4 col-sm-12">
             
@@ -224,6 +286,6 @@ const SongEditor = inject('store')(observer(class extends Component {
     </div>
     )
   }
-}))
+})))
 
-export default withRouter(SongEditor)
+export default SongEditor
