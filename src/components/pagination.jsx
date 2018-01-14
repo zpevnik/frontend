@@ -3,7 +3,6 @@ import classNames from 'classnames'
 import './pagination.css'
 
 const Pagination = props => {
-	console.log(props)
   const pages = []
   const lastPage = props.lastPage
   const pagesShownCount = Math.min(props.pageSize, lastPage)

@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { withRouter } from 'react-router'
+import { isSongEditable } from '../../lib/utils'
 
 const SongBookEditor = withRouter(inject('store')(observer(class extends Component {
 
@@ -48,7 +49,7 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
     if (!store.isLoaded) {
       return <div style={{ marginTop: '60px' }}>Loading...</div>
     }
-    
+
     return (
 			<div className="container" style={{ marginTop: '60px' }}>
       <div id="content">
@@ -118,15 +119,21 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
                   const song = store.songs.find(song => song.id === songIdObject.id)
 									return (
                     <tr key={song.id}>
-                      <td>{i}</td>
+                      <td>{i + 1}</td>
                       <td>{song.title}</td>
                       {/* <td>{song.authors.map(author => author.name).join(', ')}</td> */}
                       <td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId).name).join(', ')}</td>
                       <td className="td-actions">
                         <a className="btn btn-default btn-xs" onClick={() => history.push(`/song/${song.id}`)}>
                           <span className="glyphicon glyphicon-pencil" />
-                          {' Upravit'}
+                          {' Zobrazit'}
                         </a>
+                        {isSongEditable(song, store.user) &&
+                          <a className="btn btn-default btn-xs" onClick={() => history.push(`/song/${song.id}/edit`)}>
+                            <span className="glyphicon glyphicon-pencil" />
+                            {' Upravit'}
+                          </a>
+                        }
                         <a className="btn btn-default btn-xs" onClick={() => store.removeSongFromSongBook(song.id)}>
                           <span className="glyphicon glyphicon-delete" />
                           {' Odebrat'}

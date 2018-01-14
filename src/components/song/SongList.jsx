@@ -54,6 +54,11 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
 
   onEditClick = (e, id) => {
     e.stopPropagation()
+    this.props.history.push(`song/${id}/edit`)
+  }
+
+  onViewClick = (e, id) => {
+    e.stopPropagation()
     this.props.history.push(`song/${id}`)
   }
 
@@ -72,7 +77,7 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
           <div className="col-md-12">
             <div className="song-list-header">
               <h4>Písničky</h4>
-              <button type="button" className="btn btn-primary" onClick={() => history.push('song/new')}>Přidat novou píseň</button>
+              <button type="button" className="btn btn-primary" onClick={() => history.push('song/new/edit')}>Přidat novou píseň</button>
             </div>
             <hr />
             <div className="side-by-side clearfix">
@@ -120,7 +125,7 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                   </tr>
                 }
                 {store.isLoaded && store.songs.map((song, i) => (
-									<tr key={song.id} onClick={e => this.onEditClick(e, song.id)} className="list-item">
+									<tr key={song.id} onClick={e => this.onViewClick(e, song.id)} className="list-item">
 										<td>{i + Number(query.get('page')) * (Number(query.get('per_page')) || 50) + 1}</td>
 										<td>{song.title}</td>
 										{/* <td>{song.authors.map(author => author.name).join(', ')}</td> */}
@@ -128,19 +133,23 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                       ? store.interpreters.find(inter => inter.id === interpreterId).name
                       : null).filter(a => a).join(', ')}</td>
 										<td className="td-actions">
-                      {isSongEditable(song, store.user) &&
-                        <a className="btn btn-default btn-xs" onClick={e => this.onEditClick(e, song.id)}>
-                          <span className="glyphicon glyphicon-pencil" />
-                          {' Upravit'}
-                        </a>
-                      }
+                      <a className="btn btn-default btn-xs" onClick={e => this.onViewClick(e, song.id)}>
+                        <span className="glyphicon glyphicon-pencil" />
+                        {' Zobrazit'}
+                      </a>
 											{store.activeSongBook && store.activeSongBook.title && 
                         <a className="btn btn-default btn-xs" onClick={(e) => {
                           e.stopPropagation()
                           store.addSongToSongBook(song.id)
                         }}>
                           <span className="glyphicon glyphicon-search" />
-                          { ' Přidat do zpěvníku'}
+                          { ' Přidat do aktivního zpěvníku'}
+                        </a>
+                      }
+                      {isSongEditable(song, store.user) &&
+                        <a className="btn btn-default btn-xs" onClick={e => this.onEditClick(e, song.id)}>
+                          <span className="glyphicon glyphicon-pencil" />
+                          {' Upravit'}
                         </a>
                       }
 										</td>

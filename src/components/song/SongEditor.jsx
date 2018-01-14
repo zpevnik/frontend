@@ -43,7 +43,7 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
         this.props.history.push('/')
       } else if (isNew) {
         const id = song.link.split('songs/').filter(s => s)[0]
-        this.props.history.push(`/song/${id}`)
+        this.props.history.push(`/song/${id}/edit`)
       }
     })
   }
@@ -56,7 +56,7 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
     const { store, match } = this.props
     const isNew = match.params.id === 'new'
     const isUserPermitedToSee = isNew || (store.selectedSong.id === match.params.id)
-    const isUserPermitedToEdit = isUserPermitedToSee && isSongEditable(store.selectedSong, store.user)
+    const isUserPermitedToEdit = isUserPermitedToSee && (isNew || isSongEditable(store.selectedSong, store.user))
     const isMine = isNew || store.selectedSong.owner === store.user.id
 
     const permissionOptions = [
@@ -83,26 +83,6 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
     if (!isUserPermitedToEdit) {
       return <div style={{ marginTop: '60px' }}>You are not allowed to edit this song</div>
     }
-    // const verseRegex = /\[verse\]([\s\S]*?)\[verse\]/g
-    // const chordRegex = /\[(.+?)\]/g
-    // const verses = store.selectedSong.text.match(verseRegex)
-    //   ? store.selectedSong.text.match(verseRegex).map(verse => verse.replace(/\[verse\]/g, ''))
-    //   : []
-    // let lines = []
-    // verses.forEach(verse => {
-    //   lines = lines.concat(verse.split(/[\n\r]/))
-    // })
-    // const printLines = (lines) => {
-    //   let printedLines = []
-    //   lines.forEach(line => {
-    //     const chords = line.match(chordRegex) ? line.match(chordRegex) : []
-    //     if (chords.length > 0) {
-    //       printedLines.push(chords.join(' '))
-    //     }
-    //     printedLines.push(line.replace(chordRegex, ''))
-    //   })
-    //   return printedLines
-    // }
     return (
       <div className="container" style={{ marginTop: '60px' }}>
       <div id="content">
@@ -272,14 +252,6 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
                 <b>[chorus][repetition]</b>
               </p>
             </div>
-
-            {/* <h4>Náhled písně</h4>
-            <hr />
-            <div style={{ whiteSpace: 'pre', fontFamily: 'Courier New' }}>
-              {printLines(lines).join('\n')}
-            </div> */}
-
-            
           </div>
         </div>
       </div>

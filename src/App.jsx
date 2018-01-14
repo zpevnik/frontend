@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { BrowserRouter as Router, Route, NavLink, withRouter } from 'react-router-dom'
 import SongEditor from './components/song/SongEditor'
+import SongView from './components/song/SongView'
 import SongBookEditor from './components/songbook/SongBookEditor'
 import SongList from './components/song/SongList'
 import SongBookList from './components/songbook/SongBookList'
@@ -35,7 +36,8 @@ const App = inject('store')(observer(class extends Component {
             <Route exact path="/" component={SongList}/>
             <Route path="/songbook" component={SongBookList} exact/>
             <Route path="/songbook/:id" component={SongBookEditor}/>
-            <Route path="/song/:id" component={SongEditor}/>
+            <Route path="/song/:id/edit" component={SongEditor}/>
+            <Route exact path="/song/:id" component={SongView}/>
           </div>
         </div>
       </Router>
