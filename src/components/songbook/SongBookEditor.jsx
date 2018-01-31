@@ -117,7 +117,7 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
               <tbody>
                 {store.selectedSongBook.songs.map((songIdObject, i) => {
                   const song = store.songs.find(song => song.id === songIdObject.id)
-									return (
+									return !song ? null : (
                     <tr key={song.id}>
                       <td>{i + 1}</td>
                       <td>{song.title}</td>
