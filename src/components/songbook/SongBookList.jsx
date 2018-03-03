@@ -201,7 +201,8 @@ const SongBookList = inject('store')(observer(class extends Component {
               lastPage={Math.ceil(Number(store.totalNumberOfFoundItems) / 50) || 1}
               pageSize={Number(query.get('per_page')) || 50}
               page={Number(query.get('page')) || 0}
-              onPageChange={onPageChange} />
+              onPageChange={onPageChange}
+              autoHide={true} />
           </div>
         </div>
       </div>

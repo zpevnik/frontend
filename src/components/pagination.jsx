@@ -10,6 +10,7 @@ const Pagination = props => {
     Math.max(props.page + 1 - Math.floor(pagesShownCount / 2), 1),
     lastPage - pagesShownCount + 1
   )
+  const autoHide = props.autoHide || false
 
   for (let i = startingPage; i < startingPage + pagesShownCount; i++) {
     pages.push(i)
@@ -35,6 +36,10 @@ const Pagination = props => {
       props.onPageChange(props.lastPage - 1)
     }
   }
+
+  if (autoHide && props.lastPage === 1)
+    return null
+
   return (
     <ul className='pagination pull-right'>
       <li>
