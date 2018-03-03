@@ -9,9 +9,15 @@ const SongBookList = inject('store')(observer(class extends Component {
   constructor(props) {
     super(props)
     this.state = {
+      deleteConfirmationModal: false,
+      deleteConfirmationSongbook: '',
       newSongBookModal: false,
       newSongBookName: ''
     }
+
+    // redirect to selected songbook when in edit mode
+    if (props.store.songBookEditMode)
+      props.history.replace(`songbook/${props.store.selectedSongBook.id}`)
   }
 
   componentDidMount = () => {
@@ -54,9 +60,10 @@ const SongBookList = inject('store')(observer(class extends Component {
     this.props.history.push(`songbook/${id}`)
   }
 
-  onDeleteClick = (e, id) => {
+  onDeleteClick = (e, songBook) => {
     e.stopPropagation()
-    this.props.store.deleteSongBook(id)
+    this.setState({'deleteConfirmationSongbook': songBook})
+    this.setState({'deleteConfirmationModal': true})
   }
 
   onNewSongbook = (e) => {
@@ -66,7 +73,7 @@ const SongBookList = inject('store')(observer(class extends Component {
       .then(() => store.getSongBooks())
       .then(result => {
         store.getSongBook(result[result.length - 1].id)
-        store.addSongsMode = true
+        store.songBookEditMode = true
         this.props.history.push('/')
       })
   }
@@ -118,6 +125,34 @@ const SongBookList = inject('store')(observer(class extends Component {
         </div>
       </div>
 
+      <div className="modal" tabIndex="-1" role="dialog" style={{display: this.state.deleteConfirmationModal ? 'block' : 'none' }}>
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={() => {
+                this.setState({'deleteConfirmationModal': false})
+              }}>
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h5 className="modal-title">Smazat zpěvník</h5>
+            </div>
+            <div className="modal-body">
+              <p>Skutečně chceš smazat zpěvník <b>{this.state.deleteConfirmationSongbook.title}</b>?</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-danger" onClick={(e) => {
+                e.stopPropagation()
+                store.deleteSongBook(this.state.deleteConfirmationSongbook.id)
+                this.setState({'deleteConfirmationModal': false})
+              }}>Smazat zpěvník</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => {
+                this.setState({'deleteConfirmationModal': false})
+              }}>Zrušit</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div id="content">
         <div className="row">
           <div className="col-md-12">
@@ -164,30 +199,18 @@ const SongBookList = inject('store')(observer(class extends Component {
 									<tr key={songBook.id} className="list-item" onClick={e => this.onEditClick(e, songBook.id)}>
 										<td>{i + Number(query.get('page')) * (Number(query.get('per_page')) || 50) + 1}</td>
 										<td>{songBook.title}</td>
-										{/* <td>{songBook.authors.map(author => author.name).join(', ')}</td> */}
 										<td>{getOwnersName(songBook.owner)}</td>
 										<td className="td-actions">
-											{/*<a className="btn btn-default btn-xs" onClick={e => this.onEditClick(e, songBook.id)}>
-												<span className="glyphicon glyphicon-pencil" />
-												{' Upravit'}
-											</a>
-                      <a className="btn btn-default btn-xs" onClick={(e) => {
-                        e.stopPropagation()
-                        store.setActiveSongBook(songBook.id)
-                      }}>
-												<span className="glyphicon glyphicon-pencil" />
-												{' Nastavit jako aktivní zpěvník'}
-											</a>*/}
                       <a className="btn btn-default btn-xs" onClick={(e) => {
                         e.stopPropagation()
                         store.getSongBook(songBook.id)
-                        store.addSongsMode = true
-                        this.props.history.push(`/`)
+                        store.songBookEditMode = true
+                        history.push(`songbook/${songBook.id}`)
                       }}>
                         <span className="glyphicon glyphicon-pencil" />
-                        {' Přidat písně'}
+                        {' Editovat'}
                       </a>
-                      <a className="btn btn-default btn-xs" onClick={e => this.onDeleteClick(e, songBook.id)}>
+                      <a className="btn btn-default btn-xs" onClick={e => this.onDeleteClick(e, songBook)}>
                         <span className="glyphicon glyphicon-trash" />
                         {' Smazat zpěvník'}
                       </a>

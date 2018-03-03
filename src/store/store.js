@@ -30,7 +30,7 @@ export class Store {
       newSongMode: false,
       selectedSong: emptySong,
       selectedSongBook: emptySongBook,
-      addSongsMode: false,
+      songBookEditMode: false,
       user: {},
       authors: [],
       interpreters: [],

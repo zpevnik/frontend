@@ -2,17 +2,12 @@ import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { withRouter } from 'react-router'
 import Pagination from '../pagination'
+import EditInfoBar from '../EditInfoBar'
 import { isSongEditable, getSongsOwnerName } from '../../lib/utils'
 
 const getQueryUrl = query => `?${query.toString()}`
 
 const SongList = withRouter(inject('store')(observer(class extends Component {
-  /*constructor(props) {
-    super(props)
-    this.state = {
-      unsavedPromptModal: false
-    }
-  }*/
 
   componentDidMount = () => {
     const { store, location } = this.props
@@ -71,37 +66,12 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
   onCheckboxClick = (e, id) => {
     e.stopPropagation()
     const { store } = this.props
-    store.selectedSongBook.updated = true
 
     if (e.target.checked)
       store.addSongToSongBook(id)
     else
       store.removeSongFromSongBook(id)
-  }
-
-  onSongbookSaveClick = e => {
-    e.stopPropagation()
-    const { store } = this.props
-
-    this.props.store.addSongsMode = false
-    if (store.selectedSongBook.updated) {
-      store.updateSongBook()
-        .then(() => store.getSongBooks())
-        .then(() => {
-          this.props.history.push(`songbook/${store.selectedSongBook.id}`)
-        })
-    } else {
-      this.props.history.push(`songbook/${store.selectedSongBook.id}`)
-    }
-  }
-
-  onSongbookCancelClick = e => {
-    e.stopPropagation()
-    const { store } = this.props
-    /*if (store.selectedSongBook.updated)
-      this.setState({'unsavedPromptModal': true})
-    else*/
-    store.addSongsMode = false
+    store.selectedSongBook.updated = true
   }
 
   render() {
@@ -114,34 +84,6 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
 
     return (
 			<div className="container" style={{ marginTop: '60px' }}>
-
-      {/*<div className="modal" tabindex="-1" role="dialog" style={{display: this.state.unsavedPromptModal ? 'block' : 'none' }}>
-        <div className="modal-dialog" role="document">
-          <div className="modal-content">
-            <div className="modal-header">
-              <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={() => {
-                this.setState({'unsavedPromptModal': false})
-              }}>
-                <span aria-hidden="true">&times;</span>
-              </button>
-              <h5 className="modal-title">Neuložené změny</h5>
-            </div>
-            <div className="modal-body">
-              <p>Zpěvník byl editován a některé změny nejsou uložené.</p>
-            </div>
-            <div className="modal-footer">
-              <button type="button" className="btn btn-primary" onClick={(e) => {
-                this.onSongbookSaveClick(e)
-              }}>Uložit změny</button>
-              <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => {
-                this.setState({'unsavedPromptModal': false})
-                store.addSongsMode = false
-              }}>Odejít bez uložení</button>
-            </div>
-          </div>
-        </div>
-      </div>*/}
-
       <div id="content">
         <div className="row">
           <div className="col-md-12">
@@ -149,16 +91,8 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
               <h4>Písničky</h4>
               <button type="button" className="btn btn-primary" onClick={() => history.push('song/new/edit')}>Přidat novou píseň</button>
             </div>
-            {store.addSongsMode &&
-              <div className="well">
-              <div className="song-list-songbook-control">
-                Je editovaný zpěvník <b className="font-weight-bold">{store.selectedSongBook.title}</b>
-                <button type="button" className="btn btn-primary pull-right" onClick={e => this.onSongbookSaveClick(e)}>Uložit zpěvník</button>
-                <button type="button" className="btn btn-warning pull-right" onClick={e => this.onSongbookCancelClick(e)}>Zrušit</button>
-              </div>
-              </div>
-            }
             <hr />
+            <EditInfoBar />
             <div className="side-by-side clearfix">
               <form onSubmit={this.onSearchSubmit}>
                 <div className="input-group">
@@ -184,7 +118,7 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
             <table className="table table-striped">
               <thead>
                 <tr>
-                  {store.addSongsMode && <th></th>}
+                  {store.songBookEditMode && <th></th>}
                   <th>#</th>
                   <th>Píseň</th>
                   <th>Interpret</th>
@@ -200,7 +134,7 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                 }
                 {store.isLoaded && store.songs.map((song, i) => (
 									<tr key={song.id} onClick={e => this.onViewClick(e, song.id)} className="list-item">
-                    {store.addSongsMode &&
+                    {store.songBookEditMode &&
                       <td>
                         <input 
                           className="form-check-input"

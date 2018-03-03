@@ -2,3 +2,12 @@
 	display: flex;
 	justify-content: space-between;
 }
+
+.song-list-songbook-control {
+	margin-top: 10px;
+	line-height: 34px;
+}
+
+.song-list-songbook-control button {
+	margin: 0 5px 0 5px;
+}

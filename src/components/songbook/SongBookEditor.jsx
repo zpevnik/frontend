@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
 import { withRouter } from 'react-router'
+import EditInfoBar from '../EditInfoBar'
 import { isSongEditable } from '../../lib/utils'
 
 const SongBookEditor = withRouter(inject('store')(observer(class extends Component {
@@ -13,23 +14,15 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
     Promise.all([store.getAuthors(), store.getInterpreters()]).then(() => {
 			return store.getSongs()
 		}).then(() => {
-      store.getSongBook(match.params.id).then(() => {
+      if (!store.songBookEditMode) {
+        store.getSongBook(match.params.id).then(() => {
+          store.isLoaded = true
+        })
+      } else {
         store.isLoaded = true
-      })
+      }
     })
     store.getUser()
-  }
-
-  onSave = (e, redirect) => {
-    e.preventDefault()
-    const { store, match } = this.props
-    store.updateSongBook()
-      .then(() => store.getSongBooks())
-      .then(() => {
-        if (redirect) {
-          this.props.history.push('/songbook')
-        }
-      })
   }
 
   onSongBookExport = e => {
@@ -38,7 +31,6 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
 
   render() {
     const { store, history, match } = this.props
-    const isNew = match.params.id === 'new'
 
     if (!store.isLoaded) {
       return <div style={{ marginTop: '60px' }}>Loading...</div>
@@ -50,53 +42,58 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
         <div className="row">
           <div className="col-md-12">
             <div className="song-list-header">
-              <h4>{store.selectedSongBook.title || 'Nový zpěvník'}</h4>
+              <h4>{store.selectedSongBook.title}</h4>
             </div>
             <hr />
-            <div className="row">
-              <div className="col-md-6">
-                <div className="form-group">
-                  <label>Jméno zpěvníku:</label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="name"
-                    value={store.selectedSongBook.title}
-                    onChange={e => store.selectedSongBook.title = e.target.value} />
+            <EditInfoBar />
+            {store.songBookEditMode ? (
+              <div>
+                <div className="row">
+                  <div className="col-md-6">
+                    <div className="form-group">
+                      <label>Jméno zpěvníku:</label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        id="name"
+                        value={store.selectedSongBook.title}
+                        onChange={e => {
+                          store.selectedSongBook.title = e.target.value
+                          store.selectedSongBook.updated = true
+                        }} />
+                    </div>
+                  </div>
                 </div>
+                <button className="btn btn-default" onClick={() => history.push('/')}>
+                  Přidat písně
+                </button>
               </div>
-            </div>
-            <button className="btn btn-default" onClick={e => this.onSave(e, false)} >
-              Uložit
-            </button>
-            <button className="btn btn-default" onClick={e => this.onSave(e, true)}>
-              Uložit a odejít
-            </button>
-            <button className="btn btn-default" onClick={(e) => {
-              store.addSongsMode = true
-              history.push('/')}}>
-              Přidat písně
-            </button>
-            {!isNew &&
-              <button className="btn btn-default" onClick={this.onSongBookExport}>
-                Zobrazit v pdf
-              </button>
-            }
-            {store.exportStatus &&
-              <span>
-                {store.exportStatus === 'loading' &&
-                  <span className="alert alert-primary" style={{ padding: '7px 15px' }}>Zpěvník se připravuje...</span>
-                }
-                {store.exportStatus === 'failed' &&
-                  <span className="alert alert-danger" style={{ padding: '7px 15px' }}>Zpěvník se nepodařilo zkompilovat.</span>
-                }
-                {store.exportStatus === 'loaded' &&
-                  <span className="alert alert-success" style={{ padding: '7px 15px' }}>Zpěvník je připraven! Stáhnout jej můžeš
-                    <a target="_blank" href={store.exportLink}> zde</a>
+            ) : (
+              <div>
+                <button className="btn btn-default" onClick={() => store.songBookEditMode = true}>
+                  Editovat zpěvník
+                </button>
+                <button className="btn btn-default" onClick={this.onSongBookExport}>
+                  Exportovat do pdf
+                </button>
+
+                {store.exportStatus &&
+                  <span>
+                    {store.exportStatus === 'loading' &&
+                      <span className="alert alert-primary" style={{ padding: '7px 15px' }}>Zpěvník se připravuje...</span>
+                    }
+                    {store.exportStatus === 'failed' &&
+                      <span className="alert alert-danger" style={{ padding: '7px 15px' }}>Zpěvník se nepodařilo zkompilovat.</span>
+                    }
+                    {store.exportStatus === 'loaded' &&
+                      <span className="alert alert-success" style={{ padding: '7px 15px' }}>Zpěvník je připraven! Stáhnout jej můžeš
+                        <a target="_blank" href={store.exportLink}> zde</a>
+                      </span>
+                    }
                   </span>
                 }
-              </span>
-            }
+              </div>
+            )}
 
             <br />
             <table className="table table-striped">
@@ -115,7 +112,6 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
                     <tr key={song.id}>
                       <td>{i + 1}</td>
                       <td>{song.title}</td>
-                      {/* <td>{song.authors.map(author => author.name).join(', ')}</td> */}
                       <td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId).name).join(', ')}</td>
                       <td className="td-actions">
                         <a className="btn btn-default btn-xs" onClick={() => history.push(`/song/${song.id}`)}>
@@ -128,10 +124,12 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
                             {' Upravit'}
                           </a>
                         }
-                        <a className="btn btn-default btn-xs" onClick={() => store.removeSongFromSongBook(song.id)}>
-                          <span className="glyphicon glyphicon-delete" />
-                          {' Odebrat'}
-                        </a>
+                        {store.songBookEditMode &&
+                          <a className="btn btn-default btn-xs" onClick={() => store.removeSongFromSongBook(song.id)}>
+                            <span className="glyphicon glyphicon-delete" />
+                            {' Odebrat'}
+                          </a>
+                        }
                       </td>
                     </tr>
                   )
