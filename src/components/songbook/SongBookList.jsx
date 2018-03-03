@@ -54,6 +54,11 @@ const SongBookList = inject('store')(observer(class extends Component {
     this.props.history.push(`songbook/${id}`)
   }
 
+  onDeleteClick = (e, id) => {
+    e.stopPropagation()
+    this.props.store.deleteSongBook(id)
+  }
+
   onNewSongbook = (e) => {
     e.preventDefault()
     const { store } = this.props
@@ -181,6 +186,10 @@ const SongBookList = inject('store')(observer(class extends Component {
                       }}>
                         <span className="glyphicon glyphicon-pencil" />
                         {' Přidat písně'}
+                      </a>
+                      <a className="btn btn-default btn-xs" onClick={e => this.onDeleteClick(e, songBook.id)}>
+                        <span className="glyphicon glyphicon-trash" />
+                        {' Smazat zpěvník'}
                       </a>
 										</td>
 									</tr>

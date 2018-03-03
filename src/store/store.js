@@ -192,7 +192,6 @@ export class Store {
   }
 
   updateSongBook = () => {
-    console.log(this.selectedSongBook)
     return api.updateSongBook(this.selectedSongBook.id, this.selectedSongBook)
   }
 
@@ -353,6 +352,13 @@ export class Store {
       this.songs[this.songs.length - 1].title = label
       this.selectedSong = this.songs[this.songs.length - 1]
     }
+  }
+
+  deleteSongBook = songBookId => {
+    return api.deleteSongBook(songBookId)
+      .then(songBooksData => {
+        this.songBooks = this.songBooks.filter(songBook => songBook.id !== songBookId)
+      })
   }
 
   getUsersName = userId => {

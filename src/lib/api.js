@@ -144,9 +144,13 @@ export default class Api {
     return this.fetch(`songbooks/${songBookId}`, { method: 'PUT', body: JSON.stringify(songBook) }, undefined, 'Songbook updated successfully')
   }
 
-  updateSongsInSongBook = (songsToAdd, songsToRemove, songBookId) => {
-    return this.fetch(`songbooks/${songBookId}/songs`, { method: 'PUT', body: JSON.stringify({ set: songsToAdd, delete: songsToRemove }) }, undefined, 'Songbook updated successfully')
+  deleteSongBook = (songBookId) => {
+    return this.fetch(`songbooks/${songBookId}`, { method: 'DELETE' }, undefined, 'Songbook deleted successfully')
   }
+
+  // updateSongsInSongBook = (songsToAdd, songsToRemove, songBookId) => {
+  //   return this.fetch(`songbooks/${songBookId}/songs`, { method: 'PUT', body: JSON.stringify({ set: songsToAdd, delete: songsToRemove }) }, undefined, 'Songbook updated successfully')
+  // }
 
   // removeSongFromSongBook = (songId, songBookId) => {
   //   return this.fetch(`songbooks/${songBookId}/song/${songId}`, { method: 'DELETE' }, undefined, 'Songbook updated successfully')
