@@ -125,7 +125,10 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
                           </a>
                         }
                         {store.songBookEditMode &&
-                          <a className="btn btn-default btn-xs" onClick={() => store.removeSongFromSongBook(song.id)}>
+                          <a className="btn btn-default btn-xs" onClick={() => {
+                            store.selectedSongBook.updated = true
+                            store.removeSongFromSongBook(song.id)
+                          }}>
                             <span className="glyphicon glyphicon-delete" />
                             {' Odebrat'}
                           </a>

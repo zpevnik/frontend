@@ -241,7 +241,6 @@ export class Store {
     const requestId = this.lastRequestId
     return api.getSongBooks(query, page, perPage).then(songBooksData => {
       this.songBooks = songBooksData.data || []
-      console.log(this.songBooks)
       if (requestId === this.lastRequestId) {
         this.totalNumberOfFoundItems = songBooksData.count
       }
