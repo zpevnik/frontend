@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
-import { BrowserRouter as Router, Route, NavLink, withRouter } from 'react-router-dom'
+import { BrowserRouter as Router, Route } from 'react-router-dom'
 import SongEditor from './components/song/SongEditor'
 import SongView from './components/song/SongView'
 import SongBookEditor from './components/songbook/SongBookEditor'
@@ -12,7 +12,6 @@ import './App.css'
 const App = inject('store')(observer(class extends Component {
 
   render() {
-    const { store } = this.props
     return (
       <Router>
         <div className="container">
@@ -26,7 +25,7 @@ const App = inject('store')(observer(class extends Component {
                     <span className="icon-bar"></span>
                     <span className="icon-bar"></span>
                   </button>
-                  <a href="#"><img src="/img/logo.svg" style={{ width: '40px', marginRight: '10px'}} /></a>
+                  <a href="/"><img src="/static/img/logo.svg" alt="" style={{ width: '40px', marginRight: '10px'}} /></a>
                 </div>
                 <Navigation />
               </div>

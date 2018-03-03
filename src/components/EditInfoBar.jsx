@@ -1,7 +1,5 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
-import Select from 'react-select'
-import { NavLink } from 'react-router-dom'
 import { withRouter } from 'react-router'
 
 const EditInfoBar = withRouter(inject('store')(observer(class extends Component {
@@ -14,7 +12,7 @@ const EditInfoBar = withRouter(inject('store')(observer(class extends Component 
 
   onSongbookSaveClick = e => {
     e.stopPropagation()
-    const { store, history } = this.props
+    const { store } = this.props
     if (store.selectedSongBook.updated) {
       store.updateSongBook()
         .then(() => store.getSongBooks())

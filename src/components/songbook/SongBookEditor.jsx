@@ -30,7 +30,7 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
   }
 
   render() {
-    const { store, history, match } = this.props
+    const { store, history } = this.props
 
     if (!store.isLoaded) {
       return <div style={{ marginTop: '60px' }}>Loading...</div>
@@ -87,7 +87,7 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
                     }
                     {store.exportStatus === 'loaded' &&
                       <span className="alert alert-success" style={{ padding: '7px 15px' }}>Zpěvník je připraven! Stáhnout jej můžeš
-                        <a target="_blank" href={store.exportLink}> zde</a>
+                        <a target="_blank" rel="noopener noreferrer" href={store.exportLink}> zde</a>
                       </span>
                     }
                   </span>

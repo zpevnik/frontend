@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { observer, inject } from 'mobx-react'
-import Select from 'react-select'
 import { NavLink } from 'react-router-dom'
 import { withRouter } from 'react-router'
 

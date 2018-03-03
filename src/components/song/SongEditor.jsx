@@ -204,7 +204,7 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
                   }
                   {store.exportStatus === 'loaded' &&
                     <span className="alert alert-success" style={{ padding: '7px 15px' }}>Píseň je připravena! Stáhnout ji můžeš
-                      <a target="_blank" href={store.exportLink}> zde</a>
+                      <a target="_blank" rel="noopener noreferrer" href={store.exportLink}> zde</a>
                     </span>
                   }
                 </span>

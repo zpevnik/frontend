@@ -48,7 +48,7 @@ const SongBookList = inject('store')(observer(class extends Component {
 
   onSearchSubmit = e => {
     e.preventDefault()
-    const { store, location } = this.props
+    const { location } = this.props
     const query = new URLSearchParams(location.search)
     query.set('query', this.props.store.searchQuery)
     query.set('page', 0)
