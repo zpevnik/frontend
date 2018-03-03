@@ -30,7 +30,7 @@ export class Store {
       newSongMode: false,
       selectedSong: emptySong,
       selectedSongBook: emptySongBook,
-      activeSongBook: emptySongBook,
+      addSongsMode: false,
       user: {},
       authors: [],
       interpreters: [],
@@ -93,9 +93,6 @@ export class Store {
             value: author.id,
             label: author.name
           }))
-      },
-      get activeSongBookToSelect() {
-        return this.activeSongBook.id
       }
     })
   }
@@ -190,28 +187,23 @@ export class Store {
     toastr.error('Jejda, někde je problém: ', error)
   }
 
-  createSongBook = isNew => {
-    if (isNew) {
-      return api.createSongBook(this.selectedSongBook.title)
-    } else {
-      return api.updateSongBook(this.selectedSongBook.id, this.selectedSongBook.title)
-    }
+  createSongBook = name => {
+    return api.createSongBook(name)
+  }
+
+  updateSongBook = () => {
+    console.log(this.selectedSongBook)
+    return api.updateSongBook(this.selectedSongBook.id, this.selectedSongBook)
   }
 
   addSongToSongBook = songId => {
-    return api.updateSongsInSongBook([{ id: songId }], [], this.activeSongBook.id)
-      .then(() => {
-        this.activeSongBook.songs.push({ id: songId })
-      })
-      .catch(this.catchError)
+    if (!this.selectedSongBook.songs.find(song => song.id === songId)) {
+      this.selectedSongBook.songs.push({ id: songId })
+    }
   }
 
   removeSongFromSongBook = songId => {
-    return api.updateSongsInSongBook([], [songId], this.selectedSongBook.id)
-      .then(() => {
-        this.selectedSongBook.songs = this.selectedSongBook.songs.filter(song => song.id !== songId)
-      })
-      .catch(this.catchError)
+    this.selectedSongBook.songs = this.selectedSongBook.songs.filter(song => song.id !== songId)
   }
 
   getAuthors = () => {
@@ -250,6 +242,7 @@ export class Store {
     const requestId = this.lastRequestId
     return api.getSongBooks(query, page, perPage).then(songBooksData => {
       this.songBooks = songBooksData.data || []
+      console.log(this.songBooks)
       if (requestId === this.lastRequestId) {
         this.totalNumberOfFoundItems = songBooksData.count
       }
@@ -285,7 +278,7 @@ export class Store {
   getUser = () => {
     api.getUser().then(user => {
       if (user) {
-        this.user = { ...user, activeSongbook: user['active_songbook'], lastLogin: user['last_login'], logoutLink: user['logout_link'] }
+        this.user = { ...user, lastLogin: user['last_login'], logoutLink: user['logout_link'] }
       }
       })
       .catch(this.catchError)
@@ -360,10 +353,6 @@ export class Store {
       this.songs[this.songs.length - 1].title = label
       this.selectedSong = this.songs[this.songs.length - 1]
     }
-  }
-
-  setActiveSongBook = songBookId => {
-    this.activeSongBook = this.songBooks.find(songBook => songBook.id === songBookId)
   }
 
   getUsersName = userId => {

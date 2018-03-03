@@ -23,17 +23,8 @@ const Navigation = withRouter(inject('store')(observer(class extends Component {
 				<ul className="nav navbar-nav">
 					<li><NavLink exact to="/" activeClassName="active" className="navlink">Písně</NavLink></li>
 					<li><NavLink to="/songbook" activeClassName="active" className="navlink">Zpěvníky</NavLink></li>
-					{/* <li><NavLink to="/" activeClassName="active" className="navlink">Autoři</NavLink></li> */}
 				</ul>
 				<ul className="nav navbar-nav navbar-right">
-					<li style={{ marginTop: '15px' }}>Aktivní zpěvník:</li>
-					<li style={{ minWidth: '200px', padding: '8px 15px' }}>
-						<Select                  
-							options={store.songBooksToSelect}
-							value={store.activeSongBookToSelect}
-							onChange={payload => store.setActiveSongBook(payload.value)}
-						/>
-					</li>
 					<li><a>{store.user.name}</a></li>
 					<li><a href={store.user.logoutLink}>odhlásit</a></li>
 				</ul>

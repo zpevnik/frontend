@@ -13,14 +13,9 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
     Promise.all([store.getAuthors(), store.getInterpreters()]).then(() => {
 			return store.getSongs()
 		}).then(() => {
-      if(match.params.id !== 'new') {
-        store.getSongBook(match.params.id).then(() => {
-          store.isLoaded = true
-        })
-      } else {
-        store.clearSongBook()
+      store.getSongBook(match.params.id).then(() => {
         store.isLoaded = true
-      }
+      })
     })
     store.getUser()
   }
@@ -28,8 +23,7 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
   onSave = (e, redirect) => {
     e.preventDefault()
     const { store, match } = this.props
-    const isNew = match.params.id === 'new'
-    store.createSongBook(isNew)
+    store.updateSongBook()
       .then(() => store.getSongBooks())
       .then(() => {
         if (redirect) {
@@ -79,7 +73,7 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
               Uložit a odejít
             </button>
             <button className="btn btn-default" onClick={(e) => {
-              store.setActiveSongBook(store.selectedSongBook.id)
+              store.addSongsMode = true
               history.push('/')}}>
               Přidat písně
             </button>

@@ -7,6 +7,12 @@ import { isSongEditable, getSongsOwnerName } from '../../lib/utils'
 const getQueryUrl = query => `?${query.toString()}`
 
 const SongList = withRouter(inject('store')(observer(class extends Component {
+  /*constructor(props) {
+    super(props)
+    this.state = {
+      unsavedPromptModal: false
+    }
+  }*/
 
   componentDidMount = () => {
     const { store, location } = this.props
@@ -62,6 +68,42 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
     this.props.history.push(`song/${id}`)
   }
 
+  onCheckboxClick = (e, id) => {
+    e.stopPropagation()
+    const { store } = this.props
+    store.selectedSongBook.updated = true
+
+    if (e.target.checked)
+      store.addSongToSongBook(id)
+    else
+      store.removeSongFromSongBook(id)
+  }
+
+  onSongbookSaveClick = e => {
+    e.stopPropagation()
+    const { store } = this.props
+
+    this.props.store.addSongsMode = false
+    if (store.selectedSongBook.updated) {
+      store.updateSongBook()
+        .then(() => store.getSongBooks())
+        .then(() => {
+          this.props.history.push(`songbook/${store.selectedSongBook.id}`)
+        })
+    } else {
+      this.props.history.push(`songbook/${store.selectedSongBook.id}`)
+    }
+  }
+
+  onSongbookCancelClick = e => {
+    e.stopPropagation()
+    const { store } = this.props
+    /*if (store.selectedSongBook.updated)
+      this.setState({'unsavedPromptModal': true})
+    else*/
+    store.addSongsMode = false
+  }
+
   render() {
     const { store, history, location } = this.props
     const query = new URLSearchParams(location.search)
@@ -72,6 +114,34 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
 
     return (
 			<div className="container" style={{ marginTop: '60px' }}>
+
+      {/*<div className="modal" tabindex="-1" role="dialog" style={{display: this.state.unsavedPromptModal ? 'block' : 'none' }}>
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <button type="button" className="close" data-dismiss="modal" aria-label="Close" onClick={() => {
+                this.setState({'unsavedPromptModal': false})
+              }}>
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h5 className="modal-title">Neuložené změny</h5>
+            </div>
+            <div className="modal-body">
+              <p>Zpěvník byl editován a některé změny nejsou uložené.</p>
+            </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-primary" onClick={(e) => {
+                this.onSongbookSaveClick(e)
+              }}>Uložit změny</button>
+              <button type="button" className="btn btn-secondary" data-dismiss="modal" onClick={() => {
+                this.setState({'unsavedPromptModal': false})
+                store.addSongsMode = false
+              }}>Odejít bez uložení</button>
+            </div>
+          </div>
+        </div>
+      </div>*/}
+
       <div id="content">
         <div className="row">
           <div className="col-md-12">
@@ -79,6 +149,15 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
               <h4>Písničky</h4>
               <button type="button" className="btn btn-primary" onClick={() => history.push('song/new/edit')}>Přidat novou píseň</button>
             </div>
+            {store.addSongsMode &&
+              <div className="well">
+              <div className="song-list-songbook-control">
+                Je editovaný zpěvník <b className="font-weight-bold">{store.selectedSongBook.title}</b>
+                <button type="button" className="btn btn-primary pull-right" onClick={e => this.onSongbookSaveClick(e)}>Uložit zpěvník</button>
+                <button type="button" className="btn btn-warning pull-right" onClick={e => this.onSongbookCancelClick(e)}>Zrušit</button>
+              </div>
+              </div>
+            }
             <hr />
             <div className="side-by-side clearfix">
               <form onSubmit={this.onSearchSubmit}>
@@ -102,20 +181,15 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
               </form>
             </div>
             <br />
-            <Pagination
-              lastPage={Math.ceil(Number(store.totalNumberOfFoundItems) / 50) || 1}
-              pageSize={Number(query.get('per_page')) || 50}
-              page={Number(query.get('page')) || 0}
-              onPageChange={onPageChange} />
-            <br />
             <table className="table table-striped">
               <thead>
                 <tr>
+                  {store.addSongsMode && <th></th>}
                   <th>#</th>
                   <th>Píseň</th>
                   <th>Interpret</th>
-                  <th>Akce</th>
                   <th>Vlastník</th>
+                  <th>Akce</th>
                 </tr>
               </thead>
               <tbody>
@@ -126,26 +200,22 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                 }
                 {store.isLoaded && store.songs.map((song, i) => (
 									<tr key={song.id} onClick={e => this.onViewClick(e, song.id)} className="list-item">
+                    {store.addSongsMode &&
+                      <td>
+                        <input 
+                          className="form-check-input"
+                          type="checkbox"
+                          defaultChecked={store.selectedSongBook.songs.find(elem => elem.id === song.id) ? "checked" : ""}
+                          onClick={(e) => this.onCheckboxClick(e, song.id)} />
+                      </td>
+                    }
 										<td>{i + Number(query.get('page')) * (Number(query.get('per_page')) || 50) + 1}</td>
 										<td>{song.title}</td>
-										{/* <td>{song.authors.map(author => author.name).join(', ')}</td> */}
                     <td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId)
                       ? store.interpreters.find(inter => inter.id === interpreterId).name
                       : null).filter(a => a).join(', ')}</td>
+                    <td>{getSongsOwnerName(song, store.users)}</td>
 										<td className="td-actions">
-                      <a className="btn btn-default btn-xs" onClick={e => this.onViewClick(e, song.id)}>
-                        <span className="glyphicon glyphicon-pencil" />
-                        {' Zobrazit'}
-                      </a>
-											{store.activeSongBook && store.activeSongBook.title && 
-                        <a className="btn btn-default btn-xs" onClick={(e) => {
-                          e.stopPropagation()
-                          store.addSongToSongBook(song.id)
-                        }}>
-                          <span className="glyphicon glyphicon-search" />
-                          { ' Přidat do aktivního zpěvníku'}
-                        </a>
-                      }
                       {isSongEditable(song, store.user) &&
                         <a className="btn btn-default btn-xs" onClick={e => this.onEditClick(e, song.id)}>
                           <span className="glyphicon glyphicon-pencil" />
@@ -153,7 +223,6 @@ const SongList = withRouter(inject('store')(observer(class extends Component {
                         </a>
                       }
 										</td>
-                    <td>{getSongsOwnerName(song, store.users)}</td>
 									</tr>
 								))}
               </tbody>

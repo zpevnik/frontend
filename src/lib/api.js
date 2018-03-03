@@ -140,8 +140,8 @@ export default class Api {
     return this.fetch(`songs/${songId}`, { method: 'PUT', body: JSON.stringify(song) }, undefined, 'Song updated successfully')
   }
 
-  updateSongBook = (songBookId, songBookTitle) => {
-    return this.fetch(`songbooks/${songBookId}`, { method: 'PUT', body: JSON.stringify({ title: songBookTitle }) }, undefined, 'Songbook updated successfully')
+  updateSongBook = (songBookId, songBook) => {
+    return this.fetch(`songbooks/${songBookId}`, { method: 'PUT', body: JSON.stringify(songBook) }, undefined, 'Songbook updated successfully')
   }
 
   updateSongsInSongBook = (songsToAdd, songsToRemove, songBookId) => {

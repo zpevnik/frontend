@@ -116,9 +116,9 @@ export class Song {
   }
 
   addToSongbook = songbookId => { //TODO change this
-    return api.updateSongsInSongbook(this.activeSongBook.songs.concat([{ id: songId }]), this.activeSongBook.id)
+    return api.updateSongsInSongbook(this.selectedSongBook.songs.concat([{ id: songId }]), this.selectedSongBook.id)
       .then(() => {
-        this.activeSongBook.songs.push({ id: songId })
+        this.selectedSongBook.songs.push({ id: songId })
       })
   }
 
