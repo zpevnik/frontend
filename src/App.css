@@ -11,3 +11,26 @@
 .song-list-songbook-control button {
 	margin: 0 5px 0 5px;
 }
+
+.btn-chord {
+	width: 55px;
+	padding: 6px;
+}
+
+.editor-control .btn-group {
+	margin: 0 5px 0 0;
+}
+
+.editor-control .btn-group .btn {
+	border-bottom: none;
+	border-bottom-left-radius: unset;
+	border-bottom-right-radius: unset;
+}
+
+.editor-group .form-control {
+	border-top-left-radius: unset;
+}
+
+.editor-group textarea {
+	resize: vertical;
+}

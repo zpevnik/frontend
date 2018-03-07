@@ -7,6 +7,14 @@ import { isSongEditable } from '../../lib/utils'
 
 const SongEditor = withRouter(inject('store')(observer(class extends Component {
 
+  constructor(props) {
+    super(props)
+    this.state = {
+      shiftChords: false,
+      mollChords: false
+    }
+  }
+
   componentDidMount = () => {
     const { store, match } = this.props
     store.isLoaded = false
@@ -22,6 +30,20 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
         store.isLoaded = true
       }
     })
+    document.addEventListener("keydown", this.onKeyDown, false)
+    document.addEventListener("keyup", this.onKeyUp, false)
+  }
+
+  componentWillUnmount(){
+    document.removeEventListener("keydown", this.onKeyDown, false)
+    document.removeEventListener("keyup", this.onKeyUp, false)
+  }
+
+  onKeyDown = event => {
+    if (event.keyCode === 16)
+      this.setState({"shiftChords": !this.state.shiftChords})
+    else if (event.keyCode === 17)
+      this.setState({"mollChords": !this.state.mollChords})
   }
 
   componentDidUpdate = newProps => {
@@ -46,6 +68,19 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
         this.props.history.push(`/song/${id}/edit`)
       }
     })
+  }
+
+  onEditorButtonClick = (e) => {
+    e.preventDefault()
+    const tag = e.target.dataset.tag
+    const editor = this.refs.songEditor
+    const caretPosition = editor.selectionStart
+    const text = editor.value
+
+    editor.value = text.substring(0, caretPosition) + tag + text.substring(caretPosition)
+    this.props.store.selectedSong['text'] = editor.value
+    editor.selectionEnd = caretPosition + tag.length
+    editor.focus()
   }
 
   onSongExport = e => {
@@ -174,11 +209,65 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
                   </div>
                 </div>
               }
-              <div className="form-group">
+              <div className="form-group editor-group">
                 <label>Píseň:</label>
+                <div className="editor-control">
+                  <div className="btn-group" onClick={e => this.onEditorButtonClick(e)}>
+                    <a className="btn btn-default" data-tag="[Chorus]">Chorus</a>
+                    <a className="btn btn-default" data-tag="[Verse]">Verse</a>
+                    <a className="btn btn-default" data-tag="[Echo]">Echo</a>
+                  </div>
+
+                  <div className="btn-group"
+                      style={{display: (!this.state.shiftChords && !this.state.mollChords) ? 'inline-block' : 'none' }}
+                      onClick={e => this.onEditorButtonClick(e)}>
+                    <a className="btn btn-default btn-chord" data-tag="[C]">C</a>
+                    <a className="btn btn-default btn-chord" data-tag="[D]">D</a>
+                    <a className="btn btn-default btn-chord" data-tag="[E]">E</a>
+                    <a className="btn btn-default btn-chord" data-tag="[F]">F</a>
+                    <a className="btn btn-default btn-chord" data-tag="[G]">G</a>
+                    <a className="btn btn-default btn-chord" data-tag="[A]">A</a>
+                    <a className="btn btn-default btn-chord" data-tag="[H]">H</a>
+                  </div>
+                  <div className="btn-group"
+                      style={{display: (!this.state.shiftChords && this.state.mollChords) ? 'inline-block' : 'none' }}
+                      onClick={e => this.onEditorButtonClick(e)}>
+                    <a className="btn btn-default btn-chord" data-tag="[Cmi]">Cmi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[Dmi]">Dmi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[Emi]">Emi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[Fmi]">Fmi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[Gmi]">Gmi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[Ami]">Ami</a>
+                    <a className="btn btn-default btn-chord" data-tag="[Hmi]">Hmi</a>
+                  </div>
+                  <div className="btn-group"
+                      style={{display: (this.state.shiftChords && !this.state.mollChords) ? 'inline-block' : 'none' }}
+                      onClick={e => this.onEditorButtonClick(e)}>
+                    <a className="btn btn-default btn-chord" data-tag="[C#]">C#</a>
+                    <a className="btn btn-default btn-chord" data-tag="[D#]">D#</a>
+                    <a className="btn btn-default btn-chord" data-tag="[E#]">E#</a>
+                    <a className="btn btn-default btn-chord" data-tag="[F#]">F#</a>
+                    <a className="btn btn-default btn-chord" data-tag="[G#]">G#</a>
+                    <a className="btn btn-default btn-chord" data-tag="[A#]">A#</a>
+                    <a className="btn btn-default btn-chord" data-tag="[H#]">H#</a>
+                  </div>
+                  <div className="btn-group"
+                      style={{display: (this.state.shiftChords && this.state.mollChords) ? 'inline-block' : 'none' }}
+                      onClick={e => this.onEditorButtonClick(e)}>
+                    <a className="btn btn-default btn-chord" data-tag="[C#mi]">C#mi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[D#mi]">D#mi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[E#mi]">E#mi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[F#mi]">F#mi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[G#mi]">G#mi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[A#mi]">A#mi</a>
+                    <a className="btn btn-default btn-chord" data-tag="[H#mi]">H#mi</a>
+                  </div>
+
+                </div>
                 <textarea
                   style={{ fontFamily: 'Courier New' }}
                   className="form-control"
+                  ref="songEditor"
                   rows="10"
                   value={store.selectedSong.text}
                   onChange={payload => store.onSongChange('text', payload)} />
