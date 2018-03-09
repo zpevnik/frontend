@@ -7,6 +7,8 @@ import SongBookEditor from './components/songbook/SongBookEditor'
 import SongList from './components/song/SongList'
 import SongBookList from './components/songbook/SongBookList'
 import Navigation from './components/Navigation'
+import { DragDropContext } from 'react-dnd';
+import HTML5Backend from 'react-dnd-html5-backend';
 import './App.css'
 
 const App = inject('store')(observer(class extends Component {
@@ -44,4 +46,4 @@ const App = inject('store')(observer(class extends Component {
   }
 }))
 
-export default App
+export default DragDropContext(HTML5Backend)(App)

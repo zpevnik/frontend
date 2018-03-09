@@ -3,6 +3,7 @@ import { observer, inject } from 'mobx-react'
 import { withRouter } from 'react-router'
 import EditInfoBar from '../EditInfoBar'
 import { isSongEditable } from '../../lib/utils'
+import { DragSource, DropTarget } from 'react-dnd'
 
 const SongBookEditor = withRouter(inject('store')(observer(class extends Component {
 
@@ -106,37 +107,15 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
                 </tr>
               </thead>
               <tbody>
-                {store.selectedSongBook.songs.map((songIdObject, i) => {
-                  const song = store.songs.find(song => song.id === songIdObject.id)
-									return !song ? null : (
-                    <tr key={song.id}>
-                      <td>{i + 1}</td>
-                      <td>{song.title}</td>
-                      <td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId).name).join(', ')}</td>
-                      <td className="td-actions">
-                        <a className="btn btn-default btn-xs" onClick={() => history.push(`/song/${song.id}`)}>
-                          <span className="glyphicon glyphicon-pencil" />
-                          {' Zobrazit'}
-                        </a>
-                        {isSongEditable(song, store.user) &&
-                          <a className="btn btn-default btn-xs" onClick={() => history.push(`/song/${song.id}/edit`)}>
-                            <span className="glyphicon glyphicon-pencil" />
-                            {' Upravit'}
-                          </a>
-                        }
-                        {store.songBookEditMode &&
-                          <a className="btn btn-default btn-xs" onClick={() => {
-                            store.selectedSongBook.updated = true
-                            store.removeSongFromSongBook(song.id)
-                          }}>
-                            <span className="glyphicon glyphicon-delete" />
-                            {' Odebrat'}
-                          </a>
-                        }
-                      </td>
-                    </tr>
-                  )
-                })}
+                {store.selectedSongBook.songs
+                  .sort((a,b) => a.order - b.order)
+                  .map((songIdObject, i) => {
+                    const song = store.songs.find(song => song.id === songIdObject.id)
+                    return !song ? null : (
+                      <SongRow key={song.id} song={song} index={i}/>
+                    )
+                  })
+                }
               </tbody>
             </table>
           </div>
@@ -146,5 +125,75 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
     )
   }
 })))
+
+// Drag and drop specification
+
+const songSource = {
+  beginDrag(props) {
+    return {
+      songId: props.song.id
+    };
+  }
+};
+
+function collectDrag(connect, monitor) {
+  return {
+    connectDragSource: connect.dragSource()
+  }
+}
+
+const songTarget = {
+  drop(props, monitor) {
+    if (!props.store.songBookEditMode) {
+      return
+    }
+    const draggedSongId = monitor.getItem().songId
+    const droppedSongId = (props.song || {}).id
+    if (draggedSongId && droppedSongId) {
+      props.store.reorderSongsInSongBook(draggedSongId, droppedSongId)
+    }
+  }
+}
+
+function collectDrop(connect, monitor) {
+  return {
+    connectDropTarget: connect.dropTarget(),
+    isOver: monitor.isOver()
+  }
+}
+
+const SongRow = inject('store')(DropTarget('song', songTarget, collectDrop)(DragSource('song', songSource, collectDrag)(withRouter(inject('store')(observer(class extends Component {
+  render () {
+    const { song, store, history, index, connectDragSource, connectDropTarget, isOver } = this.props
+    return connectDropTarget(connectDragSource(
+      <tr key={song.id} className={store.songBookEditMode ? 'song-row' : ''}>
+        <td>{index + 1}</td>
+        <td style={(isOver && store.songBookEditMode) ? { paddingBottom: '40px' } : undefined }>{song.title}</td>
+        <td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId).name).join(', ')}</td>
+        <td className="td-actions">
+          <a className="btn btn-default btn-xs" onClick={() => history.push(`/song/${song.id}`)}>
+            <span className="glyphicon glyphicon-pencil" />
+            {' Zobrazit'}
+          </a>
+          {isSongEditable(song, store.user) &&
+            <a className="btn btn-default btn-xs" onClick={() => history.push(`/song/${song.id}/edit`)}>
+              <span className="glyphicon glyphicon-pencil" />
+              {' Upravit'}
+            </a>
+          }
+          {store.songBookEditMode &&
+            <a className="btn btn-default btn-xs" onClick={() => {
+              store.selectedSongBook.updated = true
+              store.removeSongFromSongBook(song.id)
+            }}>
+              <span className="glyphicon glyphicon-delete" />
+              {' Odebrat'}
+            </a>
+          }
+        </td>
+      </tr>
+    ))
+  }
+}))))))
 
 export default SongBookEditor

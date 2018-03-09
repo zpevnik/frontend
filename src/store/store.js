@@ -201,6 +201,38 @@ export class Store {
     }
   }
 
+  reorderSongsInSongBook = (draggedSongId, droppedSongId) => {
+    const draggedSong = this.selectedSongBook.songs.find(song => song.id === draggedSongId)
+    const droppedSong = this.selectedSongBook.songs.find(song => song.id === droppedSongId)
+    const draggedSongOrder = draggedSong.order
+    const droppedSongOrder = droppedSong.order
+    if ((!draggedSongOrder && draggedSongOrder !== 0) || (!droppedSongOrder && droppedSongOrder !== 0) || draggedSongOrder === droppedSongOrder) {
+      return
+    }
+    this.selectedSongBook.updated = true
+    if (draggedSongOrder > droppedSongOrder) {
+      this.selectedSongBook.songs = this.selectedSongBook.songs.map(song => {
+        if (song.id === draggedSongId) {
+          return { ...song, order: droppedSongOrder + 1 }
+        } else if (song.order > droppedSongOrder && song.order < draggedSongOrder) {
+          return { ...song, order: song.order + 1 }
+        } else {
+          return song
+        }
+      })
+    } else if (draggedSongOrder < droppedSongOrder) {
+      this.selectedSongBook.songs = this.selectedSongBook.songs.map(song => {
+        if (song.id === draggedSongId) {
+          return { ...song, order: droppedSongOrder}
+        } else if (song.order > draggedSongOrder && song.order <= droppedSongOrder) {
+          return { ...song, order: song.order - 1 }
+        } else {
+          return song
+        }
+      })
+    }
+  }
+
   removeSongFromSongBook = songId => {
     this.selectedSongBook.songs = this.selectedSongBook.songs.filter(song => song.id !== songId)
   }

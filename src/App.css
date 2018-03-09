@@ -34,3 +34,11 @@
 .editor-group textarea {
 	resize: vertical;
 }
+
+.song-row {
+	cursor: move;
+}
+
+.song-row:hover {
+	background-color: #f2f2f2 !important;
+}
