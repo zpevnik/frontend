@@ -13,7 +13,7 @@
 }
 
 .btn-chord {
-	width: 55px;
+	width: 45px;
 	padding: 6px;
 }
 
@@ -41,4 +41,12 @@
 
 .song-row:hover {
 	background-color: #f2f2f2 !important;
+}
+
+.editor-group .btn {
+	font-size: 12px;
+}
+
+.psm {
+	font-size: 13px;
 }
