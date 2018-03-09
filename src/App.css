@@ -13,7 +13,7 @@
 }
 
 .btn-chord {
-	width: 55px;
+	width: 45px;
 	padding: 6px;
 }
 
@@ -33,4 +33,12 @@
 
 .editor-group textarea {
 	resize: vertical;
+}
+
+.editor-group .btn {
+	font-size: 12px;
+}
+
+.psm {
+	font-size: 13px;
 }
