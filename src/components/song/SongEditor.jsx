@@ -317,7 +317,7 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
               <p>Akordy můžeš psát i ty, které nejsou zde v návodu a nebo v editoru samotném. Zpěvník by měl akceptovat všechny existující akordy</p>
               <p>Značky vždy značí začátek části, konec je automaticky u další značky nebo na konci písně. Jediné omezení na značky je, že část se nemůže měnit uvnitř repetice a repetice nemohou být vnořené.</p>
               <p>Značka <b>[chorus]</b> se dá bez problému použít samotná a reprezentuje opakující se stejný refrén.</p>
-              <p>Zpěvník má omezený množství znaků, které se mohou v písničce objevit. Kromě abecedy (malé i velké včetně češtiny) a čísel jsou to: <b>. , - ? ! & # " ( ) [ ] | : '</b></p>
+              <p>Zpěvník má omezený množství znaků, které se mohou v písničce objevit. Kromě abecedy (malé i velké včetně češtiny) a čísel jsou to: <b>. , - + ? ! & # " ( ) [ ] | : '</b></p>
               <p>Do editoru můžeš zadávat značky ručně a nebo použít tlačítka v hlavičce. Přepínat mezi skupinami akordů se dá pomocí <b>shift</b> a <b>ctrl</b></p>
             </div>
 
