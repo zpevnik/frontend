@@ -10,6 +10,7 @@ import Navigation from './components/Navigation'
 import { DragDropContext } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import './App.css'
+import 'react-select/dist/react-select.css'
 
 const App = inject('store')(observer(class extends Component {
 

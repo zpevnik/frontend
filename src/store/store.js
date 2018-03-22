@@ -306,7 +306,7 @@ export class Store {
   }
 
   getUser = () => {
-    api.getUser().then(user => {
+    return api.getUser().then(user => {
       if (user) {
         this.user = { ...user, lastLogin: user['last_login'], logoutLink: user['logout_link'] }
       }

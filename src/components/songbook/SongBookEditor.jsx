@@ -12,9 +12,7 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
     store.isLoaded = false
     store.exportStatus = null
     store.exportLink = null
-    Promise.all([store.getAuthors(), store.getInterpreters()]).then(() => {
-			return store.getSongs()
-		}).then(() => {
+    Promise.all([store.getUser(), store.getInterpreters()]).then(() => {
       if (!store.songBookEditMode) {
         store.getSongBook(match.params.id).then(() => {
           store.isLoaded = true
@@ -23,7 +21,6 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
         store.isLoaded = true
       }
     })
-    store.getUser()
   }
 
   onSongBookExport = e => {
@@ -109,12 +106,10 @@ const SongBookEditor = withRouter(inject('store')(observer(class extends Compone
               <tbody>
                 {store.selectedSongBook.songs
                   .sort((a,b) => a.order - b.order)
-                  .map((songIdObject, i) => {
-                    const song = store.songs.find(song => song.id === songIdObject.id)
-                    return !song ? null : (
+                  .map((song, i) => (
                       <SongRow key={song.id} song={song} index={i}/>
                     )
-                  })
+                  )
                 }
               </tbody>
             </table>
@@ -169,7 +164,7 @@ const SongRow = inject('store')(DropTarget('song', songTarget, collectDrop)(Drag
       <tr key={song.id} className={store.songBookEditMode ? 'song-row' : ''}>
         <td>{index + 1}</td>
         <td style={(isOver && store.songBookEditMode) ? { paddingBottom: '40px' } : undefined }>{song.title}</td>
-        <td>{song.interpreters.map(interpreterId => store.interpreters.find(inter => inter.id === interpreterId).name).join(', ')}</td>
+        <td>{song.interpreters.map(interpreterId => (store.interpreters.find(inter => inter.id === interpreterId) || {}).name).join(', ')}</td>
         <td className="td-actions">
           <a className="btn btn-default btn-xs" onClick={() => history.push(`/song/${song.id}`)}>
             <span className="glyphicon glyphicon-pencil" />
