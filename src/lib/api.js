@@ -10,7 +10,7 @@ const toastr = window.toastr
 
 export default class Api {
 
-  apiUrl = 'http://zpevnik.skauting.cz/api/v1'
+  apiUrl = 'https://zpevnik.skauting.cz/api/v1'
   // apiUrl = 'https://zpevnik-test.herokuapp.com/api/v1'
 
   fetch = (endpoint, options, query, toast) => {

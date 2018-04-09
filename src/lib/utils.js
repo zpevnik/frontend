@@ -4,15 +4,12 @@ export const convertSongToJson = song => (
     'text': song.text,
     'authors': song.authors,
     'interpreters': song.interpreters,
-    'visibility': song.visibility,
-    'edit_perm': song.edit_perm
+    'visibility': song.visibility
   }
 )
 
 export const isSongEditable = (song, user) => {
-  return song.edit_perm === 2 ||
-    (song.edit_perm === 1 && song.owner_unit === user.unit) ||
-    (song.edit_perm === 0 && song.owner === user.id)
+  return song.owner === user.id
 }
 
 export const getSongsOwnerName = (song, users) => {

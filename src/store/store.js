@@ -14,8 +14,7 @@ const emptySong = {
     music: [],
     lyrics: []
   },
-  visibility: 2,
-  edit_perm: 2
+  visibility: 1
 }
 
 const emptySongBook = { 
@@ -108,7 +107,7 @@ export class Store {
   onSongChange = (name, payload) => {
     if (name === 'title' || name === 'text' || name === 'description') {
       this.selectedSong[name] = payload.target.value
-    } else if (name === 'visibility' || name === 'edit_perm'){
+    } else if (name === 'visibility') {
       this.selectedSong[name] = payload.value
     } else if (name === 'interpreters') {
       this.selectedSong[name] = payload.map(item => ({
@@ -345,7 +344,7 @@ export class Store {
     e && e.preventDefault()
     this.exportStatus = 'loading'
     return api.exportSong(this.selectedSong.id).then(response => {
-      this.exportLink = 'http://zpevnik.skauting.cz/' + response.link
+      this.exportLink = 'https://zpevnik.skauting.cz/' + response.link
       this.exportStatus = 'loaded'
     }).catch(err => {
       this.exportStatus = 'failed'
@@ -356,7 +355,7 @@ export class Store {
   onSongBookExport = (id) => {
     this.exportStatus = 'loading'
     return api.exportSongBook(id ? id : this.selectedSongBook.id).then(response => {
-      this.exportLink = 'http://zpevnik.skauting.cz/' + response.link
+      this.exportLink = 'https://zpevnik.skauting.cz/' + response.link
       this.exportStatus = 'loaded'
     }).catch(err => {
       this.exportStatus = 'failed'

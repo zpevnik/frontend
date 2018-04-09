@@ -96,12 +96,8 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
 
     const permissionOptions = [
       {
-        value: 2,
-        label: 'Všichni'
-      },
-      {
         value: 1,
-        label: 'Pouze jednotka'
+        label: 'Všichni'
       },
       {
         value: 0,
@@ -196,15 +192,6 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
                         options={permissionOptions}
                         value={store.selectedSong.visibility}
                         onChange={payload => store.onSongChange('visibility', payload)} />
-                    </div>
-                  </div>
-                  <div className="col-md-6 col-sm-12">
-                    <div className="form-group">
-                      <label>Může upravovat:</label>
-                      <Select
-                        options={permissionOptions}
-                        value={store.selectedSong.edit_perm}
-                        onChange={payload => store.onSongChange('edit_perm', payload)} />
                     </div>
                   </div>
                 </div>
