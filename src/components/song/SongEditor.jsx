@@ -202,7 +202,7 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
                   <div className="btn-group" onClick={e => this.onEditorButtonClick(e)}>
                     <a className="btn btn-default" data-tag="[Chorus]">Chorus</a>
                     <a className="btn btn-default" data-tag="[Verse]">Verse</a>
-                    <a className="btn btn-default" data-tag="[Echo]">Echo</a>
+                    <a className="btn btn-default" data-tag="[Rec]">Rec</a>
                   </div>
 
                   <div className="btn-group"
@@ -298,6 +298,7 @@ const SongEditor = withRouter(inject('store')(observer(class extends Component {
                 <li><b>[C]</b>/<b>[C#]</b>/<b>[Dmi]</b> - akordy</li>
                 <li><b>[verse]</b> - sloka</li>
                 <li><b>[chorus]</b> - refrén</li>
+                <li><b>[rec]</b> - mluvené slovo</li>
                 <li><b>[solo]</b>/<b>[intro]</b>/<b>[outro]</b>/<b>[bridge]</b>/<b>[intermezzo]</b> - další možné značky - všechny reprezentují nečíslovanou sloku.</li>
                 <li><b>|:</b> ... <b>:|</b> - začátek a konec repetice</li>
               </ul>
